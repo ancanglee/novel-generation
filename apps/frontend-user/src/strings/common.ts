@@ -1,0 +1,40 @@
+export const common = {
+  appName: "NovelGen 小说仿写",
+  nav: {
+    dashboard: "仪表盘",
+    novels: "小说库",
+    settings: "设置",
+    logout: "登出",
+  },
+  actions: {
+    create: "创建",
+    save: "保存",
+    cancel: "取消",
+    confirm: "确认",
+    retry: "重试",
+    close: "关闭",
+    edit: "编辑",
+    delete: "删除",
+    upload: "上传",
+    download: "下载",
+  },
+  statuses: {
+    queued: "已排队",
+    running: "处理中",
+    succeeded: "完成",
+    failed: "失败",
+    canceled: "已取消",
+  },
+  errors: {
+    networkUnavailable: "服务暂时不可用，请稍后重试",
+    unauthenticated: "会话已过期，请重新登录",
+    forbidden: "无权访问",
+    notFound: "未找到相关资源",
+    tryAgain: "请稍后重试",
+  },
+  toasts: {
+    saved: "已保存",
+    copied: "已复制",
+    triggered: "已触发",
+  },
+} as const;

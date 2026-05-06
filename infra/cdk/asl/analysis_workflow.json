@@ -1,0 +1,131 @@
+{
+  "Comment": "U3 novel analysis workflow: supervisor-driven understanding",
+  "StartAt": "UpdateJobRunning",
+  "States": {
+    "UpdateJobRunning": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.jobs_table",
+        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "UpdateExpression": "SET #s = :r, started_at = :t",
+        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeValues": {
+          ":r": {"S": "RUNNING"},
+          ":t.$": "$$.State.EnteredTime"
+        }
+      },
+      "ResultPath": null,
+      "Next": "LoadNovelMetadata"
+    },
+    "LoadNovelMetadata": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.metadata_lambda_arn",
+        "Payload": {
+          "team_id.$": "$.team_id",
+          "novel_id.$": "$.novel_id"
+        }
+      },
+      "ResultSelector": {"metadata.$": "$.Payload"},
+      "ResultPath": "$.meta_result",
+      "Next": "InvokeSupervisor",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"],
+          "IntervalSeconds": 2,
+          "BackoffRate": 2.0,
+          "MaxAttempts": 3
+        }
+      ]
+    },
+    "InvokeSupervisor": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage.waitForTaskToken",
+      "Parameters": {
+        "QueueUrl.$": "$.analysis_queue_url",
+        "MessageBody": {
+          "kind": "analysis",
+          "taskToken.$": "$$.Task.Token",
+          "task": {
+            "job_id.$": "$.job_id",
+            "team_id.$": "$.team_id",
+            "novel_id.$": "$.novel_id",
+            "chapter_count.$": "$.meta_result.metadata.chapter_count",
+            "owner_user_id.$": "$.owner_user_id"
+          }
+        }
+      },
+      "TimeoutSeconds": 1200,
+      "ResultPath": "$.supervisor_result",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed", "Bedrock.ThrottlingException"],
+          "IntervalSeconds": 5,
+          "BackoffRate": 2.0,
+          "MaxAttempts": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "JobFailed",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "PublishAnalyzed"
+    },
+    "PublishAnalyzed": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::events:putEvents",
+      "Parameters": {
+        "Entries": [
+          {
+            "Source": "novelgen.analysis",
+            "DetailType": "novel.analyzed",
+            "Detail": {
+              "team_id.$": "$.team_id",
+              "novel_id.$": "$.novel_id",
+              "job_id.$": "$.job_id"
+            }
+          }
+        ]
+      },
+      "ResultPath": null,
+      "Next": "JobSucceeded"
+    },
+    "JobSucceeded": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.jobs_table",
+        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "UpdateExpression": "SET #s = :r, ended_at = :t",
+        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeValues": {
+          ":r": {"S": "SUCCEEDED"},
+          ":t.$": "$$.State.EnteredTime"
+        }
+      },
+      "End": true
+    },
+    "JobFailed": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.jobs_table",
+        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "UpdateExpression": "SET #s = :r, ended_at = :t, error_code = :ec",
+        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeValues": {
+          ":r": {"S": "FAILED"},
+          ":t.$": "$$.State.EnteredTime",
+          ":ec.$": "$.error.Error"
+        }
+      },
+      "Next": "Fail"
+    },
+    "Fail": {"Type": "Fail"}
+  }
+}

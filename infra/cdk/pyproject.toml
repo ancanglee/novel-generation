@@ -1,0 +1,17 @@
+[project]
+name = "novelgen-cdk"
+version = "0.1.0"
+description = "AWS CDK (Python) infrastructure for NovelGen"
+requires-python = ">=3.12"
+dependencies = [
+    "aws-cdk-lib>=2.160.0",
+    "constructs>=10.3",
+    "cdk-nag>=2.28",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["stacks", "shared_constructs"]

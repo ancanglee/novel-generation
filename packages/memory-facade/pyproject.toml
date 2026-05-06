@@ -1,0 +1,18 @@
+[project]
+name = "novelgen-memory-facade"
+version = "0.1.0"
+description = "MemoryFacade skeleton - unifies AgentCore Memory + Neptune + OpenSearch. U3 fills it."
+requires-python = ">=3.12"
+dependencies = [
+    "novelgen-types",
+]
+
+[tool.uv.sources]
+novelgen-types = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/novelgen_memory"]

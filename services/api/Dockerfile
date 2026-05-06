@@ -1,0 +1,31 @@
+FROM python:3.12-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_SYSTEM_PYTHON=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+WORKDIR /app
+
+COPY packages/shared-types-py /app/packages/shared-types-py
+COPY packages/auth-adapter /app/packages/auth-adapter
+COPY packages/storage-adapter /app/packages/storage-adapter
+COPY packages/observability-adapter /app/packages/observability-adapter
+COPY services/api /app/services/api
+COPY pyproject.toml /app/pyproject.toml
+
+RUN uv pip install --system -e /app/packages/shared-types-py \
+                             -e /app/packages/auth-adapter \
+                             -e /app/packages/storage-adapter \
+                             -e /app/packages/observability-adapter \
+                             -e /app/services/api
+
+EXPOSE 8000
+STOPSIGNAL SIGTERM
+
+CMD ["uvicorn", "novelgen_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

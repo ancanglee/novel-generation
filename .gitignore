@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+
+# AWS CDK
+cdk.out/
+cdk.context.json
+.cdk.staging/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Logs
+*.log
+
+# Test
+coverage/
+.pytest_cache/
+
+# uv
+uv.lock

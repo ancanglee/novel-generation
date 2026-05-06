@@ -1,0 +1,2 @@
+# Placeholder for `openapi-typescript` generated types (produced by `pnpm -F @novelgen/api-client generate`).
+# The Build and Test phase will run generation against /openapi.json from a live ApiService.
