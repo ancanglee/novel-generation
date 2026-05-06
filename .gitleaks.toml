@@ -1,0 +1,44 @@
+# Gitleaks 项目级配置
+# 说明：extend base 规则（覆盖 AWS / GitHub / Slack / Google / Stripe / JWT / 私钥 等）
+# 仅在此文件追加项目定制：allowlist（明确的占位 / 文档示例）。
+
+[extend]
+useDefault = true
+
+# ---- allowlist：已知的占位或文档示例，避免误报 ---------------------------------
+# 每条规则都必须定义原因 + 精确路径或正则，防止过度宽松。
+
+[[rules]]
+id = "novelgen-example-account-placeholder"
+description = "允许示例 AWS 账户 ID 123456789012（出现在文档与 CI 占位中）"
+regex = '''123456789012|111111111111|000000000000'''
+# 纯白名单规则：匹配这些字符串时不触发任何告警。
+tags = ["allowlist", "novelgen"]
+[rules.allowlist]
+regexes = ['''123456789012|111111111111|000000000000''']
+description = "示例账户号占位，在 README / scripts / CI 中使用"
+
+[[rules]]
+id = "novelgen-env-example-placeholders"
+description = ".env.example 中的变量名占位（变量=空值）"
+regex = '''^[A-Z_][A-Z0-9_]*=$'''
+[rules.allowlist]
+paths = ['''\.env\.example$''']
+
+# ---- 全局路径白名单：这些目录不参与扫描 ----------------------------------------
+[allowlist]
+description = "忽略路径：node_modules / 构建产物 / 文档目录"
+paths = [
+  '''node_modules/''',
+  '''\.venv/''',
+  '''dist/''',
+  '''build/''',
+  '''cdk\.out/''',
+  '''__pycache__/''',
+  '''aidlc-docs/''',        # AI-DLC 设计文档（可能包含 ARN 示例）
+]
+
+# 具体无风险字串（只用于过滤出现在仓库里的公共值）
+regexes = [
+  '''AmazonECSTaskExecutionRolePolicy''',   # AWS 托管策略名，被高熵规则误判
+]

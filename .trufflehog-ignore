@@ -1,0 +1,18 @@
+# TruffleHog ignore file — 每行一个 glob 或正则，匹配即跳过。
+# 作用：排除"故意看起来像密钥但实际是占位/样例"的路径。
+# 注意：此文件仅用于减少误报，不应被用来绕过真实泄露。
+
+# AI-DLC 文档目录中可能出现的 ARN / 示例 token
+aidlc-docs/
+
+# 生成产物
+node_modules/
+.venv/
+dist/
+build/
+cdk.out/
+__pycache__/
+
+# 测试 fixture 占位
+tests/fixtures/
+**/test_fixtures/

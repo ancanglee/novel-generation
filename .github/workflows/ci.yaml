@@ -80,3 +80,46 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: uv sync --all-extras
       - run: uv run pip-audit --desc || true
+
+  secret-scan:
+    name: Secret leakage scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so gitleaks can walk commit range; harmless on shallow merges too.
+          fetch-depth: 0
+
+      # 1) gitleaks — fast regex + entropy scanner with curated rules.
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Config file is optional; default rules already cover AWS / GitHub / Slack / Google / Stripe / JWT / private keys.
+          GITLEAKS_ENABLE_COMMENTS: "true"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+
+      # 2) trufflehog — complements gitleaks with live credential verification for supported providers.
+      - name: trufflehog (filesystem)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          # Scan the checked-out tree; for PRs also scan the diff range.
+          path: ./
+          base: ${{ github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event.pull_request.head.sha || github.sha }}
+          extra_args: --only-verified --exclude-paths=.trufflehog-ignore
+
+      # 3) Guardrail: fail the build if anyone accidentally commits a file named .env / *.pem / *.key / credentials /
+      #    *.p12 / *.pfx. gitleaks/trufflehog already catch content, this catches filenames early.
+      - name: Reject secret-bearing file names
+        shell: bash
+        run: |
+          set -euo pipefail
+          offenders=$(git ls-files | grep -E "(^|/)\.env($|\.local$)|\.(pem|key|p12|pfx|jks|keystore)$|(^|/)credentials$" || true)
+          if [ -n "$offenders" ]; then
+            echo "::error::Forbidden files tracked by git:"
+            echo "$offenders"
+            exit 1
+          fi
