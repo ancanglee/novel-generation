@@ -67,7 +67,9 @@ export function useChapterStream(gid: string | undefined, chapterIdx: number | u
             const delay = Math.min(16_000, 1000 * 2 ** (n - 1));
             setTimeout(connect, delay);
           } else {
-            store.markFailed(typeof data === "object" ? JSON.stringify(data) : String(data ?? "SSE_FAILED"));
+            store.markFailed(
+              typeof data === "object" ? JSON.stringify(data) : String(data ?? "SSE_FAILED"),
+            );
           }
         },
       });
@@ -88,14 +90,11 @@ export function useChapterStream(gid: string | undefined, chapterIdx: number | u
     if (!gid || !chapterIdx) return;
     store.requestCancel();
     try {
-      const res = await fetch(
-        `/api/v1/generations/${gid}/chapters/${chapterIdx}/cancel`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "X-CSRF-Token": document.cookie.match(/csrf=([^;]+)/)?.[1] ?? "" },
-        },
-      );
+      const res = await fetch(`/api/v1/generations/${gid}/chapters/${chapterIdx}/cancel`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "X-CSRF-Token": document.cookie.match(/csrf=([^;]+)/)?.[1] ?? "" },
+      });
       if (!res.ok) store.markFailed(`cancel_${res.status}`);
     } catch (err) {
       /* swallow — SSE may still deliver cancelled */

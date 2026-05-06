@@ -1,7 +1,7 @@
 import type { FastifyBaseLogger } from "fastify";
 
 export interface TelemetryEvent {
-  name: string;                // metric name (e.g. SseTtftMs)
+  name: string; // metric name (e.g. SseTtftMs)
   unit: "Milliseconds" | "Count" | "None";
   value: number;
   route?: string;

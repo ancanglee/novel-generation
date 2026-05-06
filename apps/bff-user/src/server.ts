@@ -1,7 +1,7 @@
 import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import Fastify from "fastify";
-import { generators, Issuer } from "openid-client";
+import { Issuer, generators } from "openid-client";
 import { loadConfig } from "./config";
 import { authRoutes, refreshTokensFactory } from "./routes/auth";
 import { healthRoutes } from "./routes/health";
@@ -44,9 +44,7 @@ export async function buildApp() {
     client_secret: config.COGNITO_CLIENT_SECRET,
     redirect_uris: [config.redirectUri],
     response_types: ["code"],
-    token_endpoint_auth_method: config.COGNITO_CLIENT_SECRET
-      ? "client_secret_post"
-      : "none",
+    token_endpoint_auth_method: config.COGNITO_CLIENT_SECRET ? "client_secret_post" : "none",
   });
   const refreshTokens = await refreshTokensFactory(oidcClient);
 

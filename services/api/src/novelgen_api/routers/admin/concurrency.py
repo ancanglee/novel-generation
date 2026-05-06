@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
-
 from novelgen_types.identity import Principal
+from pydantic import BaseModel, Field
 
 from novelgen_api.deps import tenancy_table
 from novelgen_api.services.concurrency_repo import ConcurrencyRepo

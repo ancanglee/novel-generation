@@ -1,4 +1,4 @@
-import { Toast as UiToast, type ToastVariant } from "@novelgen/ui";
+import { type ToastVariant, Toast as UiToast } from "@novelgen/ui";
 import { create } from "zustand";
 
 interface ToastEntry {

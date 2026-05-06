@@ -7,11 +7,11 @@
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" },
         "UpdateExpression": "SET #s = :r, started_at = :t",
-        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeNames": { "#s": "status" },
         "ExpressionAttributeValues": {
-          ":r": {"S": "RUNNING"},
+          ":r": { "S": "RUNNING" },
           ":t.$": "$$.State.EnteredTime"
         }
       },
@@ -28,7 +28,7 @@
           "novel_id.$": "$.novel_id"
         }
       },
-      "ResultSelector": {"metadata.$": "$.Payload"},
+      "ResultSelector": { "metadata.$": "$.Payload" },
       "ResultPath": "$.meta_result",
       "Next": "InvokeSupervisor",
       "Retry": [
@@ -100,11 +100,11 @@
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" },
         "UpdateExpression": "SET #s = :r, ended_at = :t",
-        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeNames": { "#s": "status" },
         "ExpressionAttributeValues": {
-          ":r": {"S": "SUCCEEDED"},
+          ":r": { "S": "SUCCEEDED" },
           ":t.$": "$$.State.EnteredTime"
         }
       },
@@ -115,17 +115,17 @@
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" },
         "UpdateExpression": "SET #s = :r, ended_at = :t, error_code = :ec",
-        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeNames": { "#s": "status" },
         "ExpressionAttributeValues": {
-          ":r": {"S": "FAILED"},
+          ":r": { "S": "FAILED" },
           ":t.$": "$$.State.EnteredTime",
           ":ec.$": "$.error.Error"
         }
       },
       "Next": "Fail"
     },
-    "Fail": {"Type": "Fail"}
+    "Fail": { "Type": "Fail" }
   }
 }

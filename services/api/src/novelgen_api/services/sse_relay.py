@@ -17,7 +17,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import aioboto3
-
 from novelgen_obs import get_logger
 
 log = get_logger("api.sse_relay")

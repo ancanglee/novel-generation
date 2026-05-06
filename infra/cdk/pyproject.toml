@@ -4,9 +4,10 @@ version = "0.1.0"
 description = "AWS CDK (Python) infrastructure for NovelGen"
 requires-python = ">=3.12"
 dependencies = [
-    "aws-cdk-lib>=2.160.0",
+    "aws-cdk-lib>=2.99,<3",
     "constructs>=10.3",
     "cdk-nag>=2.28",
+    "aws-cdk.aws-neptune-alpha>=2.99.0a0,<3",
 ]
 
 [build-system]

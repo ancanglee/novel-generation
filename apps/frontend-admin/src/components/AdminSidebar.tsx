@@ -25,9 +25,7 @@ export function AdminSidebar() {
               end={n.end}
               className={({ isActive }) =>
                 `block px-4 py-2 text-sm transition-colors ${
-                  isActive
-                    ? "bg-accent font-medium"
-                    : "text-muted-foreground hover:bg-accent/40"
+                  isActive ? "bg-accent font-medium" : "text-muted-foreground hover:bg-accent/40"
                 }`
               }
             >

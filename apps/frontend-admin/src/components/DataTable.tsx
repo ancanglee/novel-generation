@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { cn } from "@novelgen/ui";
+import type { ReactNode } from "react";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -63,7 +63,9 @@ export function DataTable<T>({
                 >
                   {columns.map((c) => (
                     <td key={String(c.key)} className="px-4 py-2 align-top">
-                      {c.render ? c.render(row) : ((row as unknown as Record<string, ReactNode>)[String(c.key)] ?? "")}
+                      {c.render
+                        ? c.render(row)
+                        : ((row as unknown as Record<string, ReactNode>)[String(c.key)] ?? "")}
                     </td>
                   ))}
                 </tr>

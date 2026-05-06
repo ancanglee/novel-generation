@@ -12,7 +12,7 @@ interface MonitoringRangeState {
 function presetWindow(preset: RangePreset): { from: string; to: string } {
   const now = new Date();
   const to = now.toISOString();
-  const shift = ({ "1h": 1, "24h": 24, "7d": 24 * 7, "30d": 24 * 30, custom: 24 }[preset] ?? 24);
+  const shift = { "1h": 1, "24h": 24, "7d": 24 * 7, "30d": 24 * 30, custom: 24 }[preset] ?? 24;
   const from = new Date(now.getTime() - shift * 3600 * 1000).toISOString();
   return { from, to };
 }

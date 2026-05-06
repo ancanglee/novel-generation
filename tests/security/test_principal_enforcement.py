@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from novelgen_types.identity import GlobalRole, Principal, TeamRole
@@ -15,7 +15,7 @@ def _make_principal(team_id, role=GlobalRole.REGULAR):
         email="alice@example.com",
         global_role=role,
         team_role=TeamRole.MEMBER,
-        jwt_expiry=datetime.now(tz=timezone.utc) + timedelta(hours=1),
+        jwt_expiry=datetime.now(tz=UTC) + timedelta(hours=1),
     )
 
 

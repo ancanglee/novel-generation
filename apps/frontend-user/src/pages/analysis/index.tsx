@@ -1,6 +1,6 @@
 import { CharacterGraph, Spinner, StyleRadar } from "@novelgen/ui";
 import { useQuery } from "@tanstack/react-query";
-import { lazy, Suspense, useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../../lib/api";
 import { qk } from "../../lib/queryKeys";
@@ -100,7 +100,9 @@ export default function AnalysisPage() {
       {tab === "characters" ? (
         <div className="h-[60vh] rounded-lg border bg-card">
           {characters.isLoading ? (
-            <div className="flex h-full items-center justify-center"><Spinner /></div>
+            <div className="flex h-full items-center justify-center">
+              <Spinner />
+            </div>
           ) : (
             <CharacterGraph
               nodes={characters.data?.nodes ?? []}
@@ -111,7 +113,13 @@ export default function AnalysisPage() {
       ) : null}
 
       {tab === "map" ? (
-        <Suspense fallback={<div className="flex h-48 items-center justify-center"><Spinner /></div>}>
+        <Suspense
+          fallback={
+            <div className="flex h-48 items-center justify-center">
+              <Spinner />
+            </div>
+          }
+        >
           <GeoMap novelId={novelId ?? ""} />
         </Suspense>
       ) : null}

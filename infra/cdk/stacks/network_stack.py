@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import aws_cdk as cdk
 from aws_cdk import aws_ec2 as ec2
-from constructs import Construct
-
 from config import EnvConfig
+from constructs import Construct
 
 
 class NetworkStack(cdk.Stack):
@@ -18,8 +17,10 @@ class NetworkStack(cdk.Stack):
             "Vpc",
             vpc_name=f"{cfg.prefix}-vpc",
             ip_addresses=ec2.IpAddresses.cidr(cfg.vpc_cidr),
-            max_azs=2,
+
             nat_gateways=1,
+            # 显式列 AZ 避免 synth 时回调 AWS API；CI 环境无凭证。
+            availability_zones=[f"{cfg.region}a", f"{cfg.region}b"],
             subnet_configuration=[
                 ec2.SubnetConfiguration(
                     name="public", subnet_type=ec2.SubnetType.PUBLIC, cidr_mask=24

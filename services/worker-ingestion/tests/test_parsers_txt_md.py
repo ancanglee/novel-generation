@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import pytest
-
 from worker_ingestion.parsers import get_parser
 from worker_ingestion.parsers.base import ParserError
-from worker_ingestion.parsers.registry import *  # noqa: F401,F403 ensure all parsers registered
+from worker_ingestion.parsers.registry import *  # noqa: F403 ensure all parsers registered
 
 
 def test_txt_parser_detects_encoding():

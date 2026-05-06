@@ -11,7 +11,6 @@ from typing import Any
 from uuid import UUID
 
 import aioboto3
-
 from novelgen_storage import DynamoDBAdapter
 
 _REGION = os.environ.get("AWS_REGION", "us-east-1")

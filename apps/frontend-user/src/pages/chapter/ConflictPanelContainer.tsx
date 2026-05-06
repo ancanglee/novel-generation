@@ -1,12 +1,12 @@
-import { ConflictPanel } from "@novelgen/ui";
 import { ApiConflictFrozenError } from "@novelgen/api-client";
 import type { ConflictItem } from "@novelgen/types";
+import { ConflictPanel } from "@novelgen/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "../../components/Toast";
 import { api } from "../../lib/api";
 import { qk } from "../../lib/queryKeys";
-import { conflict } from "../../strings";
 import { useConflictPanelStore } from "../../stores/conflictPanelStore";
+import { conflict } from "../../strings";
 
 interface ConsistencyListItem {
   scan_to: number;
@@ -27,10 +27,9 @@ export function ConflictPanelContainer({ gid }: { gid: string }) {
   const reports = useQuery({
     queryKey: qk.consistency(gid, 0),
     queryFn: () =>
-      api.request<ConsistencyListResponse>(
-        `/api/v1/generations/${gid}/consistency-reports`,
-        { query: { since_chapter: 0, limit: 50 } },
-      ),
+      api.request<ConsistencyListResponse>(`/api/v1/generations/${gid}/consistency-reports`, {
+        query: { since_chapter: 0, limit: 50 },
+      }),
   });
 
   const flatConflicts: ConflictItem[] =

@@ -12,7 +12,7 @@ import gzip
 import io
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import boto3
@@ -70,4 +70,4 @@ def _resolve_target_date(event: dict[str, Any]):
     override = event.get("date") if event else None
     if override:
         return datetime.strptime(override, "%Y-%m-%d").date()
-    return (datetime.now(tz=timezone.utc) - timedelta(days=ARCHIVE_AFTER_DAYS)).date()
+    return (datetime.now(tz=UTC) - timedelta(days=ARCHIVE_AFTER_DAYS)).date()

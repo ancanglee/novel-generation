@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from jsonschema import Draft202012Validator
-
 from worker_analysis.agents.chapter_all import _SCHEMA as CH_SCHEMA
 from worker_analysis.agents.character_global import _SCHEMA as CHAR_SCHEMA
 from worker_analysis.agents.classification import _SCHEMA as CLS_SCHEMA

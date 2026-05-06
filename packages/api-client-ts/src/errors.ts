@@ -31,13 +31,7 @@ export class ApiAuthError extends ApiClientError {
 
 export class ApiConflictFrozenError extends ApiClientError {
   constructor(body: ApiErrorBody | null) {
-    super(
-      409,
-      "CONFLICT_REWRITE_FROZEN",
-      "多次尝试未能解决，请手动编辑",
-      body,
-      null,
-    );
+    super(409, "CONFLICT_REWRITE_FROZEN", "多次尝试未能解决，请手动编辑", body, null);
     this.name = "ApiConflictFrozenError";
   }
 }

@@ -1,6 +1,6 @@
 import { Spinner } from "@novelgen/ui";
 import { useQuery } from "@tanstack/react-query";
-import { lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { api } from "../../lib/api";
 
 const ReactECharts = lazy(() => import("echarts-for-react"));
@@ -32,7 +32,11 @@ export default function GeoMap({ novelId }: { novelId: string }) {
   });
 
   if (isLoading || !data) {
-    return <div className="flex h-48 items-center justify-center"><Spinner /></div>;
+    return (
+      <div className="flex h-48 items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   const points = data.places.map((p) => ({
@@ -43,10 +47,13 @@ export default function GeoMap({ novelId }: { novelId: string }) {
   const option = {
     xAxis: { type: "value", name: "x", show: true },
     yAxis: { type: "value", name: "y", show: true },
-    tooltip: { trigger: "item", formatter: (p: unknown) => {
-      const d = p as { name: string; value: number[] };
-      return `${d.name}<br/>提及 ${d.value[2]} 次`;
-    } },
+    tooltip: {
+      trigger: "item",
+      formatter: (p: unknown) => {
+        const d = p as { name: string; value: number[] };
+        return `${d.name}<br/>提及 ${d.value[2]} 次`;
+      },
+    },
     series: [
       {
         type: "scatter",
@@ -59,7 +66,13 @@ export default function GeoMap({ novelId }: { novelId: string }) {
 
   return (
     <div className="h-[60vh] rounded-lg border bg-card">
-      <Suspense fallback={<div className="flex h-full items-center justify-center"><Spinner /></div>}>
+      <Suspense
+        fallback={
+          <div className="flex h-full items-center justify-center">
+            <Spinner />
+          </div>
+        }
+      >
         <ReactECharts option={option} style={{ height: "100%", width: "100%" }} notMerge />
       </Suspense>
     </div>

@@ -5,7 +5,7 @@ description = "Global AgentCore Browser concurrency pool using DynamoDB CAS"
 requires-python = ">=3.12"
 dependencies = [
     "novelgen-types",
-    "aioboto3>=13.0",
+    "aioboto3>=13.0,<14",
 ]
 
 [tool.uv.sources]

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../lib/api";
 import { adminQk } from "../lib/adminQueryKeys";
+import { api } from "../lib/api";
 
 export interface ModelEntry {
   model_id: string;
@@ -21,8 +21,7 @@ export interface ModelConfigRow {
 export function useModelConfigsQuery() {
   return useQuery({
     queryKey: adminQk.modelConfigs(),
-    queryFn: () =>
-      api.request<{ stages: ModelConfigRow[] }>("/api/v1/admin/model-configs"),
+    queryFn: () => api.request<{ stages: ModelConfigRow[] }>("/api/v1/admin/model-configs"),
     staleTime: 30_000,
   });
 }

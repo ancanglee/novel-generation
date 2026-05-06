@@ -24,20 +24,15 @@ export default function ChapterPage() {
   const stream = useChapterStreamStore();
   const { requestCancel } = useChapterStream(gid, chapterIdx);
 
-  const isStreaming =
-    stream.phase === "connecting" || stream.phase === "streaming";
+  const isStreaming = stream.phase === "connecting" || stream.phase === "streaming";
 
   return (
     <div className="grid h-[calc(100vh-3.5rem)] grid-cols-[1fr_22rem]">
       <section className="flex flex-col overflow-hidden border-r">
         <header className="flex items-center justify-between border-b px-6 py-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-medium">
-              {chapter.title(chapterIdx ?? 0)}
-            </h2>
-            <Badge tone={phaseTone[stream.phase]}>
-              {chapter.phase[stream.phase]}
-            </Badge>
+            <h2 className="text-lg font-medium">{chapter.title(chapterIdx ?? 0)}</h2>
+            <Badge tone={phaseTone[stream.phase]}>{chapter.phase[stream.phase]}</Badge>
             {stream.reconnectCount > 0 && isStreaming ? (
               <span className="text-xs text-muted-foreground">
                 {chapter.stream.reconnecting(stream.reconnectCount)}
@@ -73,9 +68,7 @@ export default function ChapterPage() {
         </div>
       </section>
 
-      <aside className="overflow-hidden">
-        {gid ? <ConflictPanelContainer gid={gid} /> : null}
-      </aside>
+      <aside className="overflow-hidden">{gid ? <ConflictPanelContainer gid={gid} /> : null}</aside>
     </div>
   );
 }

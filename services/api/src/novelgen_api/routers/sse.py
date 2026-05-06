@@ -6,10 +6,9 @@ import asyncio
 from uuid import UUID
 
 from fastapi import APIRouter, Header, Request
-from sse_starlette.sse import EventSourceResponse
-
 from novelgen_auth.principal import PrincipalDep
 from novelgen_types.identity import Principal
+from sse_starlette.sse import EventSourceResponse
 
 router = APIRouter(tags=["sse"])
 
@@ -43,7 +42,7 @@ async def job_stream(
                         "data": event["data"],
                         "id": event["data"].get("event_id", ""),
                     }
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     yield {"event": "heartbeat", "data": "{}"}
         finally:
             relay.unregister(subscriber.subscriber_id)
@@ -79,7 +78,7 @@ async def chapter_stream(
                         "data": event["data"],
                         "id": event["data"].get("event_id", ""),
                     }
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     yield {"event": "heartbeat", "data": "{}"}
         finally:
             relay.unregister(subscriber.subscriber_id)

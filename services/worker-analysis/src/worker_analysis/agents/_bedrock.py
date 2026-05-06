@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from typing import Any
 
 import aioboto3
-
 from novelgen_obs import emit_metric, get_logger
 
 log = get_logger("worker-analysis.bedrock")

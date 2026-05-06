@@ -5,18 +5,14 @@ Tool Use enforces JSON schema compliance on Opus 4.7 output.
 
 from __future__ import annotations
 
-import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-from uuid import UUID, uuid4
 
 import aioboto3
+from novelgen_types.critique import CritiqueReport
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from novelgen_types.critique import CritiqueReport
-
 from .context import CriticContext, render_prompt
-
 
 _TOOL_NAME = "emit_critique_report"
 
@@ -155,7 +151,7 @@ class CriticAgent:
                 ),
                 "summary": tool_input.get("summary", ""),
                 "minimal": False,
-                "created_at": datetime.now(timezone.utc),
+                "created_at": datetime.now(UTC),
             }
         )
 
@@ -173,5 +169,5 @@ def minimal_failure_report(ctx: CriticContext, reason: str) -> CritiqueReport:
         cross_chapter_concerns=[],
         summary=f"critic_failed: {reason[:180]}",
         minimal=True,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )

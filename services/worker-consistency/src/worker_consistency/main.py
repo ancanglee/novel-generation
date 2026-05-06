@@ -24,7 +24,6 @@ import aioboto3
 
 from .agent import (
     ConsistencyAgent,
-    ConsistencyAgentError,
     minimal_failure_report,
 )
 from .context import ConsistencyContext
@@ -69,7 +68,7 @@ class WorkerConsistency:
                 from novelgen_memory_facade import MemoryFacade
 
                 self._memory = MemoryFacade(region=_REGION)
-            except Exception:  # noqa: BLE001
+            except Exception:
                 self._memory = None
         else:
             self._memory = memory_facade
@@ -84,7 +83,7 @@ class WorkerConsistency:
                 obj = await s3.get_object(Bucket=_CHAPTER_BUCKET, Key=key)
                 body = await obj["Body"].read()
                 return idx, body.decode("utf-8")
-            except Exception:  # noqa: BLE001
+            except Exception:
                 return idx, ""
 
     async def _load_chapters(
@@ -108,7 +107,7 @@ class WorkerConsistency:
                 top_k=top_k,
             )
             return list(results), False
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             log.warning("memory_recall_failed err=%s", exc)
             return [], True
 
@@ -128,7 +127,7 @@ class WorkerConsistency:
                 )
                 if snap:
                     snaps.append({"character_id": str(cid), **snap})
-            except Exception:  # noqa: BLE001
+            except Exception:
                 continue
         return snaps
 
@@ -223,7 +222,7 @@ class WorkerConsistency:
             )
             return
 
-        previous = await get_last_scan_to(
+        await get_last_scan_to(
             table=_DDB_TABLE,
             team_id=team_id,
             generation_id=generation_id,
@@ -264,7 +263,7 @@ class WorkerConsistency:
 
         try:
             report, conflicts = await self._agent.run(template=_TEMPLATE, ctx=ctx)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             emit_failure(_ENV, type(exc).__name__)
             report = minimal_failure_report(ctx)
             conflicts = []
@@ -307,7 +306,7 @@ class WorkerConsistency:
                 for msg in messages:
                     try:
                         body = json.loads(msg["Body"])
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         log.error("bad_message_body err=%s", exc)
                         continue
                     try:
@@ -316,7 +315,7 @@ class WorkerConsistency:
                             QueueUrl=_QUEUE_URL,
                             ReceiptHandle=msg["ReceiptHandle"],
                         )
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         log.exception("handle_failed err=%s", exc)
 
     async def run(self) -> None:

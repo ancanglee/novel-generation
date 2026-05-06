@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import os
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import boto3
@@ -92,8 +92,8 @@ class CloudWatchAggregator:
 
         return {
             "period": {
-                "from": req.from_.astimezone(timezone.utc).isoformat(),
-                "to": req.to.astimezone(timezone.utc).isoformat(),
+                "from": req.from_.astimezone(UTC).isoformat(),
+                "to": req.to.astimezone(UTC).isoformat(),
             },
             "totals": {
                 "generations_started": started,

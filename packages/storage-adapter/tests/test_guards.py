@@ -5,15 +5,13 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-
-from novelgen_types.errors import TeamScopeViolation
-
 from novelgen_storage.guards import (
     build_s3_prefix,
     build_team_pk,
     ensure_ddb_pk_in_team,
     ensure_s3_key_in_team,
 )
+from novelgen_types.errors import TeamScopeViolation
 
 
 def test_s3_prefix_format() -> None:

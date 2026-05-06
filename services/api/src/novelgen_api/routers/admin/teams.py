@@ -5,9 +5,8 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
-
 from novelgen_types.identity import Principal
+from pydantic import BaseModel, Field
 
 from novelgen_api.deps import tenancy_table
 from novelgen_api.services.admin_team_repo import AdminTeamRepo

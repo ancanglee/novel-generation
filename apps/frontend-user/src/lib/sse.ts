@@ -43,10 +43,7 @@ export function openChapterStream(
     }
   });
 
-  const terminate = (
-    type: "completed" | "cancelled" | "error",
-    data: unknown,
-  ): void => {
+  const terminate = (type: "completed" | "cancelled" | "error", data: unknown): void => {
     if (type === "completed") handlers.onCompleted?.(data);
     else if (type === "cancelled") handlers.onCancelled?.(data);
     else handlers.onError?.(data);

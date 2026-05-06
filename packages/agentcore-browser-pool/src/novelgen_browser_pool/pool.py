@@ -12,12 +12,11 @@ from __future__ import annotations
 
 import asyncio
 import random
-from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from contextlib import asynccontextmanager, suppress
+from datetime import UTC, datetime
 from typing import Any
 
 import aioboto3
-
 from novelgen_types.errors import NovelGenError
 
 
@@ -39,7 +38,7 @@ class BrowserPool:
 
     async def acquire(self, job_id: str) -> None:
         """Try to acquire a slot. Raises BrowserSlotUnavailable after max_attempts."""
-        now = datetime.now(tz=timezone.utc).isoformat()
+        now = datetime.now(tz=UTC).isoformat()
         for attempt in range(self._max_attempts):
             async with self._session.resource("dynamodb", region_name=self._region) as ddb:
                 table = await ddb.Table(self._table_name)
@@ -75,7 +74,7 @@ class BrowserPool:
             if not item:
                 return
             holders = [h for h in item.get("holders", []) if h.get("job_id") != job_id]
-            try:
+            with suppress(ddb.meta.client.exceptions.ConditionalCheckFailedException):
                 await table.update_item(
                     Key={"pk": _PK, "sk": _SK},
                     UpdateExpression="SET current_count = :c, holders = :h",
@@ -86,12 +85,10 @@ class BrowserPool:
                         ":zero": 0,
                     },
                 )
-            except ddb.meta.client.exceptions.ConditionalCheckFailedException:
-                pass
 
     async def cleanup_expired(self, ttl_seconds: int = 300) -> int:
         """Scan holders for acquired_at older than ttl_seconds, reclaim slots."""
-        cutoff = datetime.now(tz=timezone.utc).timestamp() - ttl_seconds
+        cutoff = datetime.now(tz=UTC).timestamp() - ttl_seconds
         async with self._session.resource("dynamodb", region_name=self._region) as ddb:
             table = await ddb.Table(self._table_name)
             resp = await table.get_item(Key={"pk": _PK, "sk": _SK}, ConsistentRead=True)

@@ -19,7 +19,7 @@ def ensure_s3_key_in_team(key: str, team_id: UUID) -> None:
     prefix = build_s3_prefix(team_id)
     if not key.startswith(prefix):
         raise TeamScopeViolation(
-            f"S3 key does not start with team prefix",
+            "S3 key does not start with team prefix",
             key=key,
             expected_prefix=prefix,
         )

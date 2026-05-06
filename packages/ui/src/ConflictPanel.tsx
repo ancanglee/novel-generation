@@ -1,9 +1,9 @@
 import type { ConflictItem } from "@novelgen/types";
 import { ConflictType } from "@novelgen/types";
 import { AlertTriangle, ArrowRightCircle, Check } from "lucide-react";
+import { cn } from "./lib/cn";
 import { Badge } from "./primitives/Badge";
 import { Button } from "./primitives/Button";
-import { cn } from "./lib/cn";
 
 const TYPE_LABELS: Record<ConflictType, { label: string; tone: "warning" | "danger" | "info" }> = {
   [ConflictType.CharacterState]: { label: "人物状态", tone: "warning" },

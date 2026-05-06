@@ -12,9 +12,9 @@ from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_sns as sns
 from aws_cdk import aws_sns_subscriptions as sns_subs
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.compute_stack import ComputeStack
 from stacks.data_stack import DataStack
 

@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 
 from fastapi import FastAPI
-
 from novelgen_auth import CognitoJwtVerifier, JwtVerifierConfig
 from novelgen_auth.principal import set_verifier
 

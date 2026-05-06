@@ -7,7 +7,11 @@ export default function NovelDetailPage() {
   const novel = useNovel(novelId);
 
   if (novel.isLoading) {
-    return <div className="p-8 flex gap-2 items-center"><Spinner /> 加载小说…</div>;
+    return (
+      <div className="p-8 flex gap-2 items-center">
+        <Spinner /> 加载小说…
+      </div>
+    );
   }
   if (!novel.data) {
     return <div className="p-8 text-sm text-muted-foreground">未找到该小说</div>;

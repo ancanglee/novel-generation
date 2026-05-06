@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 
 import httpx
 from cachetools import TTLCache
-
 from novelgen_types.errors import NovelGenError
 
 _CACHE: TTLCache[str, urllib.robotparser.RobotFileParser] = TTLCache(maxsize=1024, ttl=86400)

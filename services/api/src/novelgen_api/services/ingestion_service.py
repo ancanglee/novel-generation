@@ -5,13 +5,12 @@ from __future__ import annotations
 import json
 import os
 import unicodedata
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import aioboto3
-
-from novelgen_storage import DynamoDBAdapter, S3Adapter, build_s3_prefix, build_team_pk
-from novelgen_types.errors import ConflictError, NovelGenError
+from novelgen_storage import build_s3_prefix, build_team_pk
+from novelgen_types.errors import NovelGenError
 from novelgen_types.identity import Principal
 
 from novelgen_api.deps import jobs_table, novels_bucket, tenancy_table
@@ -51,7 +50,7 @@ async def idempotency_store(team_id: UUID, key: str, novel_id: UUID) -> None:
     if not key:
         return
     ddb = jobs_table()
-    ttl = int(datetime.now(tz=timezone.utc).timestamp()) + 86400
+    ttl = int(datetime.now(tz=UTC).timestamp()) + 86400
     await ddb.put(
         team_id=team_id,
         item={
@@ -82,7 +81,7 @@ async def create_novel_row(
     original_format: str | None = None,
 ) -> None:
     ddb = tenancy_table()
-    now = datetime.now(tz=timezone.utc).isoformat()
+    now = datetime.now(tz=UTC).isoformat()
     await ddb.put(
         team_id=principal.team_id,
         item={
@@ -106,7 +105,7 @@ async def create_novel_row(
 
 async def create_job_row(principal: Principal, job_id: UUID, novel_id: UUID, payload: dict) -> None:
     ddb = jobs_table()
-    now = datetime.now(tz=timezone.utc).isoformat()
+    now = datetime.now(tz=UTC).isoformat()
     await ddb.put(
         team_id=principal.team_id,
         item={

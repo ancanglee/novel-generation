@@ -1,4 +1,4 @@
-import { ChapterReader, Spinner, type ReaderTheme } from "@novelgen/ui";
+import { ChapterReader, type ReaderTheme, Spinner } from "@novelgen/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -38,19 +38,14 @@ export default function ReaderPage() {
 
   useEffect(() => {
     if (!gid) return;
-    localStorage.setItem(
-      STORAGE_KEY(gid),
-      JSON.stringify({ theme, fontSize, current }),
-    );
+    localStorage.setItem(STORAGE_KEY(gid), JSON.stringify({ theme, fontSize, current }));
   }, [gid, theme, fontSize, current]);
 
   const toc = useQuery({
     enabled: Boolean(gid),
     queryKey: ["reader", gid, "toc"] as const,
     queryFn: () =>
-      api.request<{ chapters: ChapterListItem[] }>(
-        `/api/v1/generations/${gid}/chapters`,
-      ),
+      api.request<{ chapters: ChapterListItem[] }>(`/api/v1/generations/${gid}/chapters`),
   });
   const content = useQuery({
     enabled: Boolean(gid) && Boolean(current),
@@ -102,13 +97,11 @@ export default function ReaderPage() {
       </aside>
       <main className="overflow-y-auto">
         {content.isLoading ? (
-          <div className="flex h-full items-center justify-center"><Spinner /></div>
+          <div className="flex h-full items-center justify-center">
+            <Spinner />
+          </div>
         ) : content.data ? (
-          <ChapterReader
-            markdown={content.data.markdown}
-            theme={theme}
-            fontSize={fontSize}
-          />
+          <ChapterReader markdown={content.data.markdown} theme={theme} fontSize={fontSize} />
         ) : null}
       </main>
     </div>

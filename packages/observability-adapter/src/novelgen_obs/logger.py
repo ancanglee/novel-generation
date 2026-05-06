@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from contextvars import ContextVar
 
 from aws_lambda_powertools import Logger
@@ -14,11 +15,14 @@ def set_request_id(request_id: str) -> None:
     _request_id.set(request_id)
 
 
-def _inject_request_id(*, service: str, message: dict[str, object]) -> dict[str, object]:
-    rid = _request_id.get()
-    if rid:
-        message["request_id"] = rid
-    return message
+class _RequestIdFilter(logging.Filter):
+    """Inject the current request_id from the contextvar into every log record."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        rid = _request_id.get()
+        if rid:
+            record.request_id = rid
+        return True
 
 
 def get_logger(service: str) -> Logger:
@@ -29,5 +33,5 @@ def get_logger(service: str) -> Logger:
         json_default=str,
     )
     logger.append_keys(service=service)
-    logger.register_processor(_inject_request_id)
+    logger.addFilter(_RequestIdFilter())
     return logger

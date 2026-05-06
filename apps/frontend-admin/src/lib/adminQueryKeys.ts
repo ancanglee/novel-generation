@@ -8,8 +8,7 @@ export const adminQk = {
   templates: () => ["admin", "outline-templates"] as const,
   audit: (filter: string) => ["admin", "audit", filter] as const,
   auditEvent: (id: string) => ["admin", "audit", "event", id] as const,
-  monitoring: (from: string, to: string) =>
-    ["admin", "monitoring", from, to] as const,
+  monitoring: (from: string, to: string) => ["admin", "monitoring", from, to] as const,
   alerts: () => ["admin", "alerts"] as const,
   concurrency: () => ["admin", "concurrency"] as const,
 } as const;

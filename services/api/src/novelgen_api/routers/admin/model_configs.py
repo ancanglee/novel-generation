@@ -6,9 +6,8 @@ import os
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel, Field
-
 from novelgen_types.identity import Principal
+from pydantic import BaseModel, Field
 
 from novelgen_api.deps import tenancy_table
 from novelgen_api.services.model_config_repo import ModelConfigRepo, OptimisticLockError

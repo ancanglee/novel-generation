@@ -8,10 +8,8 @@ export const qk = {
   generations: () => ["generations"] as const,
   generation: (gid: string) => ["generations", gid] as const,
   outline: (gid: string) => ["generations", gid, "outline"] as const,
-  chapter: (gid: string, n: number) =>
-    ["generations", gid, "chapters", n] as const,
-  critique: (gid: string, n: number) =>
-    ["generations", gid, "chapters", n, "critique"] as const,
+  chapter: (gid: string, n: number) => ["generations", gid, "chapters", n] as const,
+  critique: (gid: string, n: number) => ["generations", gid, "chapters", n, "critique"] as const,
   consistency: (gid: string, sinceChapter: number) =>
     ["generations", gid, "consistency", sinceChapter] as const,
   job: (id: string) => ["jobs", id] as const,

@@ -6,6 +6,7 @@ import asyncio
 import json
 import os
 import signal
+from datetime import UTC
 from typing import Any
 from uuid import UUID
 
@@ -17,7 +18,6 @@ from worker_generation.agents import (
     generate_chapter_stream,
     generate_outline,
     review_outline_changes,
-    self_critique_chapter,
 )
 from worker_generation.cancel_cache import CancelCache
 from worker_generation.event_publisher import EventPublisher
@@ -240,8 +240,8 @@ async def _do_outline_review(task: dict[str, Any], s3: S3Adapter, tenancy: Dynam
 
 
 def _now() -> str:
-    from datetime import datetime, timezone
-    return datetime.now(tz=timezone.utc).isoformat()
+    from datetime import datetime
+    return datetime.now(tz=UTC).isoformat()
 
 
 def _install_signal_handlers(stop_event: asyncio.Event) -> None:

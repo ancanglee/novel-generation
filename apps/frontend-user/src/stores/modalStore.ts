@@ -1,11 +1,6 @@
 import { create } from "zustand";
 
-export type ModalKind =
-  | "create_generation"
-  | "edit_outline"
-  | "rewrite_confirm"
-  | "export"
-  | null;
+export type ModalKind = "create_generation" | "edit_outline" | "rewrite_confirm" | "export" | null;
 
 interface ModalState {
   kind: ModalKind;

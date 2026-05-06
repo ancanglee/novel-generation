@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
-
 from worker_critic.agent import CriticAgent, CriticAgentError, minimal_failure_report
 from worker_critic.context import CriticContext
 

@@ -5,7 +5,6 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-
 from novelgen_types.critique import ConflictType, UserAction
 from worker_consistency.agent import (
     ConsistencyAgent,

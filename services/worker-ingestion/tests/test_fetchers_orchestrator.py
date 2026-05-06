@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from worker_ingestion.fetchers import orchestrator, tier1_http, tier2_browser
 from worker_ingestion.robots import RobotsDenied
 

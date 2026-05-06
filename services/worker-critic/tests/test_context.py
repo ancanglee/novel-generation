@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from uuid import uuid4
 
 from worker_critic.context import CriticContext, pick_recent_summaries, render_prompt

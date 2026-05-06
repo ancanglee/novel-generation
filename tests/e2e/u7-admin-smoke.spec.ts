@@ -44,9 +44,7 @@ test.describe("U7 admin smoke", () => {
     await expect(page.getByRole("heading", { name: "概览" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "管理后台导航" })).toBeVisible();
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa"])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
     const serious = results.violations.filter(
       (v) => v.impact === "serious" || v.impact === "critical",
     );
@@ -74,8 +72,22 @@ test.describe("U7 admin smoke", () => {
         status: 200,
         body: JSON.stringify({
           stages: [
-            { stage: "chapter", primary: { model_id: "claude-sonnet-4-7", max_output_tokens: 4096, temperature: 0.7 }, fallback: null, version: 3, updated_by: "admin", updated_at: "2026-04-30T10:00:00Z" },
-            { stage: "critic", primary: { model_id: "claude-opus-4-7", max_output_tokens: 2000, temperature: 0.2 }, fallback: null, version: 1, updated_by: "admin", updated_at: "2026-04-30T09:00:00Z" },
+            {
+              stage: "chapter",
+              primary: { model_id: "claude-sonnet-4-7", max_output_tokens: 4096, temperature: 0.7 },
+              fallback: null,
+              version: 3,
+              updated_by: "admin",
+              updated_at: "2026-04-30T10:00:00Z",
+            },
+            {
+              stage: "critic",
+              primary: { model_id: "claude-opus-4-7", max_output_tokens: 2000, temperature: 0.2 },
+              fallback: null,
+              version: 1,
+              updated_by: "admin",
+              updated_at: "2026-04-30T09:00:00Z",
+            },
           ],
         }),
       }),

@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import logging
-import os
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Request
-
 from novelgen_types.identity import Principal
 
 from novelgen_api.deps import tenancy_table
@@ -69,8 +67,8 @@ async def list_audit_events(
     team_uuid: UUID | None
     try:
         team_uuid = UUID(team_id) if team_id else None
-    except ValueError:
-        raise HTTPException(400, {"error": {"code": "INVALID_TEAM_ID"}})
+    except ValueError as exc:
+        raise HTTPException(400, {"error": {"code": "INVALID_TEAM_ID"}}) from exc
 
     rows = await _audit_repo().query(team_id=team_uuid, limit=500)
     filtered = _filter(
@@ -99,8 +97,8 @@ async def get_audit_event(
     team_uuid: UUID | None
     try:
         team_uuid = UUID(team_id) if team_id else None
-    except ValueError:
-        raise HTTPException(400, {"error": {"code": "INVALID_TEAM_ID"}})
+    except ValueError as exc:
+        raise HTTPException(400, {"error": {"code": "INVALID_TEAM_ID"}}) from exc
 
     row = await _audit_repo().get_by_event_id(team_id=team_uuid, event_id=event_id)
     if not row:

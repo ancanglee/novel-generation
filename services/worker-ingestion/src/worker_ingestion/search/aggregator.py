@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import unicodedata
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Awaitable, Callable
 
 from worker_ingestion.search.base import SearchResult, SearchSource, SearchSourceId
 from worker_ingestion.search.ctext import CtextSource

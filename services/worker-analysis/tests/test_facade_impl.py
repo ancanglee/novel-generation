@@ -6,9 +6,7 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-
 from novelgen_types.fact import Fact, FactType
-
 from worker_analysis.memory.facade_impl import MemoryFacadeImpl
 
 
@@ -50,7 +48,7 @@ async def test_remember_raises_on_agentcore_failure():
     facade = MemoryFacadeImpl(agentcore=agentcore, neptune=neptune, opensearch=opensearch)
     facade.embed = AsyncMock(return_value=[0.0] * 1024)
 
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         await facade.remember(uuid4(), uuid4(), [_make_fact()])
 
 

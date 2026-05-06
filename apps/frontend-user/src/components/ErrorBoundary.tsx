@@ -37,11 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.props.fallback) return this.props.fallback;
     return (
       <div className="mx-auto max-w-xl p-8">
-        <Toast
-          variant="error"
-          title="页面出错"
-          description={this.state.error.message}
-        >
+        <Toast variant="error" title="页面出错" description={this.state.error.message}>
           <div className="mt-3">
             <Button size="sm" variant="secondary" onClick={this.reset}>
               重试

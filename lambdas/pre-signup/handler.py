@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import boto3
@@ -19,6 +19,7 @@ ENV = os.environ.get("ENV", "dev")
 
 _ddb = boto3.resource("dynamodb")
 _table = _ddb.Table(TENANCY_TABLE)
+_ddb_client = boto3.client("dynamodb")
 
 
 def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
@@ -33,11 +34,11 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
     team_id = str(uuid.uuid4())
     user_id = event.get("userName") or str(uuid.uuid4())
-    now = datetime.now(tz=timezone.utc).isoformat()
+    now = datetime.now(tz=UTC).isoformat()
 
     team_pk = f"TEAM#{team_id}"
     # Write Team meta + User row atomically via TransactWriteItems
-    _ddb.meta.client.transact_write_items(
+    _ddb_client.transact_write_items(
         TransactItems=[
             {
                 "Put": {

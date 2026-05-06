@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { Spinner } from "./primitives/Spinner";
 
 export interface CharacterNode {
@@ -26,7 +26,13 @@ const GraphImpl = lazy(() => import("./internal/CharacterGraphImpl"));
 
 export function CharacterGraph(props: CharacterGraphProps) {
   return (
-    <Suspense fallback={<div className="flex h-full items-center justify-center"><Spinner label="加载人物关系图" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex h-full items-center justify-center">
+          <Spinner label="加载人物关系图" />
+        </div>
+      }
+    >
       <GraphImpl {...props} />
     </Suspense>
   );

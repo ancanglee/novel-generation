@@ -8,10 +8,8 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-
 from worker_analysis.agents._bedrock import ToolCallResult
 from worker_analysis.agents.chapter_all import _SCHEMA as CH_SCHEMA
-from worker_analysis.checkpoint import CheckpointStore
 from worker_analysis.supervisor import Supervisor, SupervisorContext
 
 

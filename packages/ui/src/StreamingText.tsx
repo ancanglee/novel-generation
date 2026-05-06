@@ -39,7 +39,10 @@ export function StreamingText({
         <span
           ref={endRef}
           aria-hidden
-          className={cn("ml-0.5 inline-block w-[0.4em] animate-pulse bg-current align-middle", cursorClassName)}
+          className={cn(
+            "ml-0.5 inline-block w-[0.4em] animate-pulse bg-current align-middle",
+            cursorClassName,
+          )}
           style={{ height: "1em" }}
         />
       ) : null}

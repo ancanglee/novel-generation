@@ -5,9 +5,8 @@ from __future__ import annotations
 import hashlib
 from typing import Protocol
 
-from pydantic import BaseModel, Field
-
 from novelgen_types.errors import NovelGenError
+from pydantic import BaseModel, Field
 
 
 class ParserError(NovelGenError):

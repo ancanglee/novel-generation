@@ -42,8 +42,11 @@ export async function authRoutes(app: FastifyInstance, deps: AuthRoutesDeps): Pr
   });
 
   app.get("/auth/callback", async (req, reply) => {
-    const raw = req.cookies["auth_state"];
-    if (!raw) return reply.code(400).send({ error: { code: "NO_AUTH_STATE", message: "登录状态缺失", request_id: req.id } });
+    const raw = req.cookies.auth_state;
+    if (!raw)
+      return reply
+        .code(400)
+        .send({ error: { code: "NO_AUTH_STATE", message: "登录状态缺失", request_id: req.id } });
     const [state, codeVerifier, nonce] = raw.split("|");
     reply.clearCookie("auth_state", { path: "/auth" });
 
@@ -125,9 +128,7 @@ export async function authRoutes(app: FastifyInstance, deps: AuthRoutesDeps): Pr
   });
 }
 
-export async function refreshTokensFactory(
-  client: BaseClient,
-): Promise<
+export async function refreshTokensFactory(client: BaseClient): Promise<
   (refreshToken: string) => Promise<{
     idToken: string;
     accessToken: string;

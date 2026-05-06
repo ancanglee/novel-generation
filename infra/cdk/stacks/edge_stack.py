@@ -6,9 +6,9 @@ import aws_cdk as cdk
 from aws_cdk import aws_cloudfront as cf
 from aws_cdk import aws_cloudfront_origins as origins
 from aws_cdk import aws_wafv2 as wafv2
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.compute_stack import ComputeStack
 
 

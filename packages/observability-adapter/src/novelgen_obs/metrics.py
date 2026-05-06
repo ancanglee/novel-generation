@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from aws_lambda_powertools.metrics import MetricUnit, Metrics
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
 
 # Single shared Metrics instance per process (thread-safe; powertools handles flushing)
 _metrics = Metrics(namespace="NovelGen")

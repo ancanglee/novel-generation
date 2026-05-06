@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { Spinner } from "./primitives/Spinner";
 
 // echarts-for-react pulls in echarts core — keep it in the analysis chunk.
@@ -73,8 +73,19 @@ export function StyleRadar({
 
   return (
     <div style={{ height }}>
-      <Suspense fallback={<div className="flex h-full items-center justify-center"><Spinner /></div>}>
-        <ReactECharts option={option} style={{ height: "100%", width: "100%" }} notMerge lazyUpdate />
+      <Suspense
+        fallback={
+          <div className="flex h-full items-center justify-center">
+            <Spinner />
+          </div>
+        }
+      >
+        <ReactECharts
+          option={option}
+          style={{ height: "100%", width: "100%" }}
+          notMerge
+          lazyUpdate
+        />
       </Suspense>
     </div>
   );

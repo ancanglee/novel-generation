@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
@@ -16,7 +16,6 @@ os.environ.setdefault("COGNITO_APP_CLIENT_ID", "test-client")
 
 import pytest
 from fastapi.testclient import TestClient
-
 from novelgen_auth.principal import verify_principal
 from novelgen_types.identity import GlobalRole, Principal, TeamRole
 
@@ -28,7 +27,7 @@ def _fake_principal() -> Principal:
         email="alice@example.com",
         global_role=GlobalRole.REGULAR,
         team_role=TeamRole.MEMBER,
-        jwt_expiry=datetime.now(tz=timezone.utc) + timedelta(hours=1),
+        jwt_expiry=datetime.now(tz=UTC) + timedelta(hours=1),
     )
 
 

@@ -7,10 +7,9 @@ from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel
-
 from novelgen_auth.principal import PrincipalDep
 from novelgen_types.identity import Principal
+from pydantic import BaseModel
 
 from novelgen_api.services import conflict_repo
 from novelgen_api.services.conflict_repo import ConflictFrozen, ConflictNotFound
@@ -178,5 +177,5 @@ async def _invoke_u4_rewrite(
             return None
         data = resp.json()
         return str(data.get("generation_id") or "")
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None

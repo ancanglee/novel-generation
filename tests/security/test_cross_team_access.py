@@ -11,7 +11,6 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-
 from novelgen_storage.guards import (
     build_s3_prefix,
     build_team_pk,

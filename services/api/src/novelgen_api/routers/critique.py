@@ -5,7 +5,6 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
-
 from novelgen_auth.principal import PrincipalDep
 from novelgen_types.identity import Principal
 

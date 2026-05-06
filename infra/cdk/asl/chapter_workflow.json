@@ -12,7 +12,7 @@
           "generation_id.$": "$.generation_id"
         }
       },
-      "ResultSelector": {"context.$": "$.Payload.context"},
+      "ResultSelector": { "context.$": "$.Payload.context" },
       "ResultPath": "$.ctx",
       "Next": "InitLoop"
     },
@@ -36,17 +36,21 @@
       "Resource": "arn:aws:states:::dynamodb:getItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"}
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" }
       },
-      "ResultSelector": {"cancel_requested.$": "$.Item.cancel_requested.BOOL"},
+      "ResultSelector": { "cancel_requested.$": "$.Item.cancel_requested.BOOL" },
       "ResultPath": "$.status_check",
       "Next": "DecideContinue"
     },
     "DecideContinue": {
       "Type": "Choice",
       "Choices": [
-        {"Variable": "$.status_check.cancel_requested", "BooleanEquals": true, "Next": "JobCanceled"},
-        {"Variable": "$.i", "NumericGreaterThanPath": "$.chapter_count", "Next": "JobSucceeded"}
+        {
+          "Variable": "$.status_check.cancel_requested",
+          "BooleanEquals": true,
+          "Next": "JobCanceled"
+        },
+        { "Variable": "$.i", "NumericGreaterThanPath": "$.chapter_count", "Next": "JobSucceeded" }
       ],
       "Default": "GenerateChapter"
     },
@@ -75,7 +79,7 @@
           "MaxAttempts": 3
         }
       ],
-      "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "JobFailed", "ResultPath": "$.error"}],
+      "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "JobFailed", "ResultPath": "$.error" }],
       "ResultPath": "$.chapter_result",
       "Next": "IncrementCounter"
     },
@@ -99,11 +103,11 @@
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" },
         "UpdateExpression": "SET #s = :r, ended_at = :t",
-        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeNames": { "#s": "status" },
         "ExpressionAttributeValues": {
-          ":r": {"S": "SUCCEEDED"},
+          ":r": { "S": "SUCCEEDED" },
           ":t.$": "$$.State.EnteredTime"
         }
       },
@@ -114,11 +118,11 @@
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" },
         "UpdateExpression": "SET #s = :r, ended_at = :t",
-        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeNames": { "#s": "status" },
         "ExpressionAttributeValues": {
-          ":r": {"S": "CANCELED"},
+          ":r": { "S": "CANCELED" },
           ":t.$": "$$.State.EnteredTime"
         }
       },
@@ -129,17 +133,17 @@
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
         "TableName.$": "$.jobs_table",
-        "Key": {"pk.$": "$.team_pk", "sk.$": "$.job_sk"},
+        "Key": { "pk.$": "$.team_pk", "sk.$": "$.job_sk" },
         "UpdateExpression": "SET #s = :r, ended_at = :t, error_code = :ec",
-        "ExpressionAttributeNames": {"#s": "status"},
+        "ExpressionAttributeNames": { "#s": "status" },
         "ExpressionAttributeValues": {
-          ":r": {"S": "FAILED"},
+          ":r": { "S": "FAILED" },
           ":t.$": "$$.State.EnteredTime",
           ":ec.$": "$.error.Error"
         }
       },
       "Next": "Fail"
     },
-    "Fail": {"Type": "Fail"}
+    "Fail": { "Type": "Fail" }
   }
 }

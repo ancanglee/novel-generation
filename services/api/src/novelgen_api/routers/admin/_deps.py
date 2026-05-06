@@ -11,12 +11,11 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException, Request, status
-
 from novelgen_auth.principal import PrincipalDep
 from novelgen_types.identity import GlobalRole, Principal
 
@@ -44,7 +43,7 @@ AdminPrincipalDep = Depends(require_admin_role)
 
 
 def now_iso() -> str:
-    return datetime.now(tz=timezone.utc).isoformat()
+    return datetime.now(tz=UTC).isoformat()
 
 
 def make_audit_put_item(

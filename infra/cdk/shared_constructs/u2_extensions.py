@@ -13,7 +13,6 @@ from aws_cdk import aws_cloudwatch_actions as cw_actions
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_events as events
-from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_sqs as sqs

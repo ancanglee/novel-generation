@@ -18,7 +18,6 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_sns as sns
-from aws_cdk import aws_sns_subscriptions as sns_subs
 from aws_cdk import aws_sqs as sqs
 from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_stepfunctions as sfn

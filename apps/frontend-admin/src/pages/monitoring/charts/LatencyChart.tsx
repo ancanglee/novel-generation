@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
 import { Spinner } from "@novelgen/ui";
+import { Suspense, lazy } from "react";
 import type { MonitoringSummary } from "../../../hooks/useMonitoringQuery";
 
 const ReactECharts = lazy(() => import("echarts-for-react"));

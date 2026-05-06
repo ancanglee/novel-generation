@@ -8,10 +8,10 @@ pass the `frozen = false` precondition when attempts reach `max_attempts`.
 from __future__ import annotations
 
 import json
-import os
 import sys
 import time
 from dataclasses import dataclass
+from datetime import UTC
 from typing import Any
 from uuid import UUID
 
@@ -64,7 +64,7 @@ async def find_by_id(*, team_id: UUID, conflict_id: UUID) -> dict[str, Any]:
     To keep the API ergonomic, we search across all CONFLICT# items and match
     on embedded conflict_id. Limited to 200 hits — tune if needed.
     """
-    pk = build_team_pk(team_id)
+    build_team_pk(team_id)
     items = await tenancy_table().query_by_sk_prefix(
         team_id=team_id, sk_prefix="CONFLICT#", limit=500
     )
@@ -135,7 +135,7 @@ async def request_rewrite(
             },
             condition="rewrite_attempts = :cur AND frozen = :fcur",
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         # Race: another request incremented first; translate to frozen for safety.
         raise ConflictFrozen(str(conflict_id)) from exc
 
@@ -146,9 +146,9 @@ async def request_rewrite(
 
 
 def _now_iso() -> str:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _emit_conflict_loop_metric(env: str) -> None:

@@ -6,7 +6,6 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-
 from novelgen_types.fact import FactType, build_fact_key
 from novelgen_types.identity import GlobalRole, Principal, TeamRole
 from novelgen_types.job import JobStatus, is_valid_transition
@@ -21,7 +20,7 @@ def test_principal_is_frozen() -> None:
         team_role=TeamRole.MEMBER,
         jwt_expiry=datetime.utcnow(),
     )
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         p.team_id = uuid4()  # type: ignore[misc]
 
 

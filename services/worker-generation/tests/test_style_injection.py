@@ -47,6 +47,7 @@ def test_memory_block_truncates_to_20():
 
 
 def test_previous_chapter_block_keeps_last_500_chars():
-    text = "a" * 1000
+    # 使用不会出现在标签里的字符 "Z"，避免把 <previous_chapter_tail> 中的 a 字符计入。
+    text = "Z" * 1000
     block = build_previous_chapter_block(text)
-    assert block.count("a") == 500
+    assert block.count("Z") == 500

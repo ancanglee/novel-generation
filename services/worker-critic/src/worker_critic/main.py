@@ -148,7 +148,7 @@ class WorkerCritic:
                 request_id=request_id,
             )
             report = await self._agent.run(template=_TEMPLATE, ctx=ctx)
-        except (CriticAgentError, Exception) as exc:  # noqa: BLE001
+        except (CriticAgentError, Exception) as exc:
             log.warning("critic_failed gid=%s idx=%s err=%s", generation_id, chapter_idx, exc)
             emit_failure(_ENV, type(exc).__name__)
             ctx = CriticContext(
@@ -197,7 +197,7 @@ class WorkerCritic:
                 for msg in messages:
                     try:
                         body = json.loads(msg["Body"])
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         log.error("bad_message_body err=%s", exc)
                         continue
                     try:
@@ -206,7 +206,7 @@ class WorkerCritic:
                             QueueUrl=_QUEUE_URL,
                             ReceiptHandle=msg["ReceiptHandle"],
                         )
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         log.exception("handle_failed err=%s", exc)
 
     async def run(self) -> None:

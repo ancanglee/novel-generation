@@ -5,7 +5,7 @@ import type { ApiError as ApiErrorBody } from "@novelgen/types";
 import { ApiAuthError, ApiClientError, ApiConflictFrozenError } from "./errors";
 
 export interface ApiClientOptions {
-  baseUrl?: string;              // defaults to '' (same origin — BFF)
+  baseUrl?: string; // defaults to '' (same origin — BFF)
   getCsrfToken: () => string;
   onUnauthenticated?: () => void; // triggered on 401
 }

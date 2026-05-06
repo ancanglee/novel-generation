@@ -1,5 +1,5 @@
-import Fastify, { type FastifyInstance } from "fastify";
 import fastifyCookie from "@fastify/cookie";
+import Fastify, { type FastifyInstance } from "fastify";
 import { beforeEach, describe, expect, it } from "vitest";
 import { csrfGuard } from "../src/security/csrf";
 
@@ -7,7 +7,7 @@ async function makeApp(): Promise<FastifyInstance> {
   const app = Fastify();
   await app.register(fastifyCookie);
   app.addHook("preHandler", async (req, reply) => {
-    if (req.cookies["sid"] === "valid") {
+    if (req.cookies.sid === "valid") {
       req.session = {
         id: "sid",
         idToken: "",

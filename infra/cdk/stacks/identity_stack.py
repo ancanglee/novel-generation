@@ -6,11 +6,10 @@ import aws_cdk as cdk
 from aws_cdk import aws_cognito as cognito
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
-from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.data_stack import DataStack
 
 

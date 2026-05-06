@@ -3,12 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@9.0.0",
-  "workspaces": [
-    "apps/*",
-    "packages/shared-types-ts",
-    "packages/api-client-ts",
-    "packages/ui"
-  ],
   "scripts": {
     "lint": "biome check .",
     "format": "biome format --write .",

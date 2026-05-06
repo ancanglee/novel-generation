@@ -4,8 +4,7 @@ import { proxySse } from "../proxy/sse";
 import { proxyToApi } from "../proxy/standard";
 import { requireAuth } from "../session/middleware";
 
-const SSE_PATTERN =
-  /^\/api\/v1\/generations\/[^/]+\/chapters\/[^/]+\/stream(\?.*)?$/;
+const SSE_PATTERN = /^\/api\/v1\/generations\/[^/]+\/chapters\/[^/]+\/stream(\?.*)?$/;
 
 export async function proxyRoutes(
   app: FastifyInstance,

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import type { TelemetryEvent } from "../telemetry/emf";
 import { requireAuth } from "../session/middleware";
+import type { TelemetryEvent } from "../telemetry/emf";
 
 const telemetrySchema = z.object({
   name: z
@@ -12,9 +12,7 @@ const telemetrySchema = z.object({
   unit: z.enum(["Milliseconds", "Count", "None"]),
   value: z.number().finite(),
   route: z.string().max(200).optional(),
-  attrs: z
-    .record(z.union([z.string().max(100), z.number(), z.boolean()]))
-    .optional(),
+  attrs: z.record(z.union([z.string().max(100), z.number(), z.boolean()])).optional(),
 });
 
 export async function telemetryRoutes(

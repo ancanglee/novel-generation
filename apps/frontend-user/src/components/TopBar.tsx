@@ -1,7 +1,7 @@
 import { Button } from "@novelgen/ui";
 import { Link, NavLink } from "react-router-dom";
-import { common } from "../strings";
 import { useSessionStore } from "../stores/sessionStore";
+import { common } from "../strings";
 import { TeamPicker } from "./TeamPicker";
 
 const navItems = [
@@ -36,10 +36,7 @@ export function TopBar() {
             </NavLink>
           ))}
           {isAdmin ? (
-            <a
-              href="/admin"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
+            <a href="/admin" className="text-sm text-muted-foreground hover:text-foreground">
               Admin Console
             </a>
           ) : null}

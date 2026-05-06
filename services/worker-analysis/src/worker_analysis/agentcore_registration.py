@@ -6,7 +6,7 @@ has already registered, we skip without contention.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from novelgen_obs import get_logger
 from novelgen_storage import DynamoDBAdapter
@@ -37,10 +37,8 @@ class AgentCoreRegistrar:
 
     async def _try_claim_registration(self) -> bool:
         """Conditional write: only the first caller succeeds."""
-        from novelgen_storage.guards import build_team_pk  # lazy import
 
         # Registration counter is platform-scope (not team-scope); use a pseudo-team PK.
-        pseudo_team = "SYSTEM"
         try:
             inserted = await self._ddb.put_if_absent(
                 team_id=None,  # type: ignore[arg-type]
@@ -48,7 +46,7 @@ class AgentCoreRegistrar:
                     "pk": f"AGENT_REG#{self._env}",
                     "sk": f"AGENT#{self._agent_id}",
                     "agent_id": self._agent_id,
-                    "registered_at": datetime.now(tz=timezone.utc).isoformat(),
+                    "registered_at": datetime.now(tz=UTC).isoformat(),
                 },
             )
             return bool(inserted)

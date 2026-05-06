@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
-
 from novelgen_types.critique import (
     ConflictItem,
     ConflictType,
@@ -19,10 +17,11 @@ from novelgen_types.critique import (
     Severity,
     UserAction,
 )
+from pydantic import ValidationError
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def test_critique_report_roundtrip() -> None:

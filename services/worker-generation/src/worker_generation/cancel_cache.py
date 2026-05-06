@@ -6,7 +6,6 @@ from typing import Protocol
 from uuid import UUID
 
 from cachetools import TTLCache
-
 from novelgen_obs import get_logger
 
 log = get_logger("worker-generation.cancel")

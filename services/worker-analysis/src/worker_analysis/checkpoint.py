@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -28,7 +28,7 @@ class CheckpointStore:
         partial_results: dict[str, Any],
         current_goal: str,
     ) -> None:
-        ttl = int(datetime.now(tz=timezone.utc).timestamp()) + CHECKPOINT_TTL_SECONDS
+        ttl = int(datetime.now(tz=UTC).timestamp()) + CHECKPOINT_TTL_SECONDS
         await self._ddb.put(
             team_id=team_id,
             item={
@@ -38,7 +38,7 @@ class CheckpointStore:
                 "step_history": step_history,
                 "partial_results": json.dumps(partial_results, default=str),
                 "current_goal": current_goal,
-                "saved_at": datetime.now(tz=timezone.utc).isoformat(),
+                "saved_at": datetime.now(tz=UTC).isoformat(),
                 "ttl": ttl,
             },
         )

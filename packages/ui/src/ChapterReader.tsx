@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { cn } from "./lib/cn";
 import { Spinner } from "./primitives/Spinner";
 

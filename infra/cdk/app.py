@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import aws_cdk as cdk
-
 from config import load_config
 from stacks.agentcore_stack import AgentCoreStack
 from stacks.compute_stack import ComputeStack

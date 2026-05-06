@@ -62,16 +62,22 @@ export default function IngestForm() {
   return (
     <section className="rounded-lg border bg-card p-4">
       <div className="mb-3 flex gap-2">
-        <TabButton active={mode === "upload"} onClick={() => setMode("upload")}>本地上传</TabButton>
-        <TabButton active={mode === "search"} onClick={() => setMode("search")}>公版书搜索</TabButton>
-        <TabButton active={mode === "url"} onClick={() => setMode("url")}>URL 抓取</TabButton>
+        <TabButton active={mode === "upload"} onClick={() => setMode("upload")}>
+          本地上传
+        </TabButton>
+        <TabButton active={mode === "search"} onClick={() => setMode("search")}>
+          公版书搜索
+        </TabButton>
+        <TabButton active={mode === "url"} onClick={() => setMode("url")}>
+          URL 抓取
+        </TabButton>
       </div>
 
       {mode === "upload" ? (
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const input = (e.currentTarget.elements.namedItem("file") as HTMLInputElement);
+            const input = e.currentTarget.elements.namedItem("file") as HTMLInputElement;
             const f = input.files?.[0];
             if (f) uploadMutation.mutate(f);
           }}
@@ -94,7 +100,7 @@ export default function IngestForm() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const input = (e.currentTarget.elements.namedItem("keyword") as HTMLInputElement);
+            const input = e.currentTarget.elements.namedItem("keyword") as HTMLInputElement;
             if (input.value.trim().length >= 2) searchMutation.mutate(input.value.trim());
           }}
           className="flex flex-wrap items-center gap-2"
@@ -106,7 +112,9 @@ export default function IngestForm() {
             minLength={2}
             required
           />
-          <Button type="submit" loading={searchMutation.isPending}>搜索并下载</Button>
+          <Button type="submit" loading={searchMutation.isPending}>
+            搜索并下载
+          </Button>
         </form>
       ) : null}
 
@@ -114,7 +122,7 @@ export default function IngestForm() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const input = (e.currentTarget.elements.namedItem("url") as HTMLInputElement);
+            const input = e.currentTarget.elements.namedItem("url") as HTMLInputElement;
             if (input.validity.valid) urlMutation.mutate(input.value);
           }}
           className="flex flex-wrap items-center gap-2"
@@ -126,14 +134,20 @@ export default function IngestForm() {
             className="h-10 flex-1 rounded-md border px-3 text-sm"
             required
           />
-          <Button type="submit" loading={urlMutation.isPending}>抓取</Button>
+          <Button type="submit" loading={urlMutation.isPending}>
+            抓取
+          </Button>
         </form>
       ) : null}
     </section>
   );
 }
 
-function TabButton({ active, children, ...rest }: React.ComponentProps<"button"> & { active: boolean }) {
+function TabButton({
+  active,
+  children,
+  ...rest
+}: React.ComponentProps<"button"> & { active: boolean }) {
   return (
     <button
       type="button"

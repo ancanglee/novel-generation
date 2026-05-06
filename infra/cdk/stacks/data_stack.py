@@ -10,9 +10,9 @@ from aws_cdk import aws_opensearchserverless as aoss
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_secretsmanager as secrets
 from aws_cdk import aws_ssm as ssm
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.network_stack import NetworkStack
 
 
@@ -272,4 +272,4 @@ class DataStack(cdk.Stack):
         )
 
         cdk.CfnOutput(self, "NovelsBucketName", value=self.novels_bucket.bucket_name)
-        cdk.CfnOutput(self, "AossCollection", value=self.aoss_collection.attr_collection_endpoint)
+        cdk.CfnOutput(self, "AossCollectionEndpoint", value=self.aoss_collection.attr_collection_endpoint)

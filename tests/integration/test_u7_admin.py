@@ -9,15 +9,13 @@ Covers:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock
+from uuid import uuid4
 
 import pytest
-from fastapi import FastAPI, Request
-from fastapi.testclient import TestClient
-
+from fastapi import Request
 from novelgen_types.identity import GlobalRole, Principal, TeamRole
-from uuid import uuid4
 
 
 @pytest.fixture()
@@ -47,8 +45,8 @@ def regular_principal() -> Principal:
 
 
 def test_require_admin_role_403(regular_principal: Principal) -> None:
-    from novelgen_api.routers.admin._deps import require_admin_role
     from fastapi import HTTPException
+    from novelgen_api.routers.admin._deps import require_admin_role
 
     req = _fake_request()
     with pytest.raises(HTTPException) as exc:
@@ -74,14 +72,14 @@ def test_monitoring_cache_bucket() -> None:
     )
 
     cache_clear()
-    t0 = datetime(2026, 4, 30, 10, 0, 15, tzinfo=timezone.utc)
-    t1 = datetime(2026, 4, 30, 10, 0, 45, tzinfo=timezone.utc)  # same minute
-    t2 = datetime(2026, 4, 30, 11, 0, 0, tzinfo=timezone.utc)
+    t0 = datetime(2026, 4, 30, 10, 0, 15, tzinfo=UTC)
+    t1 = datetime(2026, 4, 30, 10, 0, 45, tzinfo=UTC)  # same minute
+    t2 = datetime(2026, 4, 30, 11, 0, 0, tzinfo=UTC)
 
     cache_set(t0, t2, {"value": 42})
     assert cache_get(t1, t2) == {"value": 42}  # same bucket hit
 
-    t2b = datetime(2026, 4, 30, 11, 1, 0, tzinfo=timezone.utc)
+    t2b = datetime(2026, 4, 30, 11, 1, 0, tzinfo=UTC)
     assert cache_get(t1, t2b) is None  # different bucket, miss
 
     assert minute_bucket(t0) == minute_bucket(t1)
@@ -123,7 +121,6 @@ def test_paginator_slice() -> None:
 @pytest.mark.asyncio
 async def test_model_config_optimistic_lock() -> None:
     from novelgen_api.services.model_config_repo import (
-        ModelConfigRecord,
         ModelConfigRepo,
         OptimisticLockError,
     )
@@ -163,5 +160,5 @@ def _fake_request() -> Request:
         "client": ("127.0.0.1", 1234),
     }
     req = Request(scope)
-    setattr(req.state, "request_id", "req-test")
+    req.state.request_id = "req-test"
     return req

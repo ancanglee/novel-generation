@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from novelgen_browser_pool import BrowserPool
@@ -17,7 +17,7 @@ from worker_ingestion.fetchers.orchestrator import FetchResult
 from worker_ingestion.llm_chapter_splitter import split_with_llm
 from worker_ingestion.parsers import get_parser
 from worker_ingestion.parsers.base import ParsedDocument
-from worker_ingestion.parsers.registry import *  # noqa: F401,F403
+from worker_ingestion.parsers.registry import *  # noqa: F403
 from worker_ingestion.url_normalizer import cache_key
 
 log = get_logger("worker-ingestion")
@@ -60,14 +60,14 @@ class Pipeline:
         self._confidence_floor = heuristic_confidence_floor
 
     async def run(self, job: PipelineJob) -> PipelineOutcome:
-        started = datetime.now(tz=timezone.utc)
+        started = datetime.now(tz=UTC)
         try:
             parsed = await self._acquire(job)
             chapters = await self._split(parsed.markdown)
             outcome = await self._persist(job, parsed, chapters)
             return outcome
         finally:
-            elapsed_ms = (datetime.now(tz=timezone.utc) - started).total_seconds() * 1000
+            elapsed_ms = (datetime.now(tz=UTC) - started).total_seconds() * 1000
             emit_job_duration(job_type="ingestion", status="done", duration_ms=elapsed_ms)
 
     async def _acquire(self, job: PipelineJob) -> ParsedDocument:
@@ -139,7 +139,7 @@ class Pipeline:
             total_words += len(ch.content)
 
         sha = hashlib.sha256(parsed.markdown.encode("utf-8")).hexdigest()
-        now = datetime.now(tz=timezone.utc).isoformat()
+        now = datetime.now(tz=UTC).isoformat()
         await self._ddb.update(
             team_id=job.team_id,
             pk=build_team_pk(job.team_id),

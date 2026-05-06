@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-
 from worker_ingestion.pipeline import Pipeline, PipelineJob
 
 

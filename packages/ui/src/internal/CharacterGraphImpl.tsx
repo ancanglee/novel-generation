@@ -1,11 +1,5 @@
 // Real React Flow implementation, split into its own chunk via CharacterGraph's lazy import.
-import {
-  Background,
-  Controls,
-  type Edge,
-  type Node,
-  ReactFlow,
-} from "@xyflow/react";
+import { Background, Controls, type Edge, type Node, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
 import type { CharacterEdge, CharacterGraphProps, CharacterNode } from "../CharacterGraph";
@@ -37,11 +31,7 @@ function toEdges(edges: CharacterEdge[]): Edge[] {
   }));
 }
 
-export default function CharacterGraphImpl({
-  nodes,
-  edges,
-  onSelectNode,
-}: CharacterGraphProps) {
+export default function CharacterGraphImpl({ nodes, edges, onSelectNode }: CharacterGraphProps) {
   const rfNodes = useMemo(() => layoutNodes(nodes), [nodes]);
   const rfEdges = useMemo(() => toEdges(edges), [edges]);
 

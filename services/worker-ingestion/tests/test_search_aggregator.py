@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock
 
 import pytest
-
 from worker_ingestion.search.aggregator import SearchAggregator, _dedupe
 from worker_ingestion.search.base import SearchResult, SearchSourceId
 

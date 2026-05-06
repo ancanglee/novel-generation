@@ -8,9 +8,10 @@ from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_logs as logs
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.data_stack import DataStack
 from stacks.identity_stack import IdentityStack
 from stacks.messaging_stack import MessagingStack
@@ -67,6 +68,19 @@ class ComputeStack(cdk.Stack):
             )
 
         # ---- ECS Cluster --------------------------------------------------
+        # 本 stack 自建 ECS ExecutionRole，避免 identity_stack 与 compute_stack
+        # 之间因 LogGroup.grant_write 形成循环依赖（identity -> compute）。
+        self._local_exec_role = iam.Role(
+            self, "EcsExecRole",
+            role_name=f"{cfg.prefix}-ecs-exec-compute",
+            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AmazonECSTaskExecutionRolePolicy"
+                )
+            ],
+        )
+
         self.cluster = ecs.Cluster(
             self,
             "Cluster",
@@ -102,7 +116,7 @@ class ComputeStack(cdk.Stack):
             vpc=network.vpc,
             security_group=network.sg_ecs_api,
             task_role=identity.api_task_role,
-            exec_role=identity.ecs_exec_role,
+            exec_role=self._local_exec_role,
             cpu=1024,
             memory_mb=2048,
             port=8000,
@@ -118,7 +132,7 @@ class ComputeStack(cdk.Stack):
                 "FrontUserRole",
                 assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             ),
-            exec_role=identity.ecs_exec_role,
+            exec_role=self._local_exec_role,
             cpu=512,
             memory_mb=1024,
             port=3000,
@@ -134,7 +148,7 @@ class ComputeStack(cdk.Stack):
                 "FrontAdminRole",
                 assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             ),
-            exec_role=identity.ecs_exec_role,
+            exec_role=self._local_exec_role,
             cpu=256,
             memory_mb=512,
             port=3001,
@@ -146,7 +160,7 @@ class ComputeStack(cdk.Stack):
         for wt in ["analysis", "generation", "critic", "consistency", "moderation"]:
             self.worker_services[wt] = self._make_worker_service(
                 wt, cfg, network.vpc, network.sg_ecs_worker,
-                identity.worker_roles[wt], identity.ecs_exec_role,
+                identity.worker_roles[wt], self._local_exec_role,
             )
 
         # ---- Listener rules ----------------------------------------------
@@ -203,7 +217,16 @@ class ComputeStack(cdk.Stack):
             image=ecs.ContainerImage.from_registry(
                 "public.ecr.aws/amazonlinux/amazonlinux:2023"  # placeholder before first push
             ),
-            logging=ecs.LogDriver.aws_logs(stream_prefix=name),
+            logging=ecs.LogDriver.aws_logs(
+                stream_prefix=name,
+                log_group=logs.LogGroup(
+                    self,
+                    f"{name.title().replace('-', '')}LogGroup",
+                    log_group_name=f"/novelgen/{cfg.env_name}/{name}",
+                    retention=logs.RetentionDays.ONE_MONTH,
+                    removal_policy=cdk.RemovalPolicy.DESTROY,
+                ),
+            ),
             port_mappings=[ecs.PortMapping(container_port=port)],
             environment={"ENV": cfg.env_name, "SERVICE_NAME": name},
         )
@@ -279,7 +302,16 @@ class ComputeStack(cdk.Stack):
             image=ecs.ContainerImage.from_registry(
                 "public.ecr.aws/amazonlinux/amazonlinux:2023"
             ),
-            logging=ecs.LogDriver.aws_logs(stream_prefix=f"worker-{wt}"),
+            logging=ecs.LogDriver.aws_logs(
+                stream_prefix=f"worker-{wt}",
+                log_group=logs.LogGroup(
+                    self,
+                    f"Worker{wt.title().replace('-','')}LogGroup",
+                    log_group_name=f"/novelgen/{cfg.env_name}/worker-{wt}",
+                    retention=logs.RetentionDays.ONE_MONTH,
+                    removal_policy=cdk.RemovalPolicy.DESTROY,
+                ),
+            ),
             environment={"ENV": cfg.env_name, "WORKER_TYPE": wt},
         )
         service = ecs.FargateService(

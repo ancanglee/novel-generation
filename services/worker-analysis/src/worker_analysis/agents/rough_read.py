@@ -62,8 +62,11 @@ def _build_prompt(titles: list[str], total_words: int, goal: str) -> str:
 
 
 def _enforce_bounds(selected: list[int], n_chapters: int) -> list[int]:
+    # 先过滤掉越界索引（LLM 可能返回 >n_chapters 的脏数据）。
+    clamped = {i for i in selected if 1 <= i <= n_chapters}
     must_have = {1, 2} | {max(1, n_chapters - 1), n_chapters}
-    combined = sorted({*selected, *must_have})
+    must_have = {i for i in must_have if 1 <= i <= n_chapters}
+    combined = sorted(clamped | must_have)
     if len(combined) > MAX_SAMPLES:
         step = max(1, len(combined) // MAX_SAMPLES)
         combined = combined[::step][:MAX_SAMPLES]

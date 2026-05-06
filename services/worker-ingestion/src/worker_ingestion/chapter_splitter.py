@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import itertools
+import math
 import re
 import statistics
 from dataclasses import dataclass
@@ -62,13 +64,13 @@ def split_heuristic(markdown: str) -> tuple[list[ChapterSplit], float]:
         if len(matches) < 2:
             continue
         positions = [m.start() for m in matches]
-        gaps = [b - a for a, b in zip(positions, positions[1:])]
+        gaps = [b - a for a, b in itertools.pairwise(positions)]
         if not gaps:
             continue
         mean_gap = statistics.mean(gaps)
         stdev_gap = statistics.pstdev(gaps) if len(gaps) > 1 else 0.0
         uniformity = 1.0 - min(1.0, (stdev_gap / mean_gap) if mean_gap else 1.0)
-        count_score = min(1.0, len(matches) / 20.0)
+        count_score = min(1.0, math.log1p(len(matches)) / math.log1p(10))
         confidence = 0.4 * uniformity + 0.6 * count_score
 
         chapters: list[ChapterSplit] = []

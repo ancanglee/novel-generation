@@ -1,5 +1,5 @@
 import { Button, Spinner } from "@novelgen/ui";
-import { lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { useMonitoringQuery } from "../../hooks/useMonitoringQuery";
 import { type RangePreset, useMonitoringRangeStore } from "../../stores/monitoringRangeStore";
 
@@ -27,7 +27,9 @@ export default function MonitoringPage() {
               {p}
             </Button>
           ))}
-          <Button size="sm" variant="secondary" onClick={() => q.refetch()}>刷新</Button>
+          <Button size="sm" variant="secondary" onClick={() => q.refetch()}>
+            刷新
+          </Button>
         </div>
       </header>
 

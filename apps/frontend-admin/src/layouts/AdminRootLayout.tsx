@@ -3,8 +3,8 @@ import { Outlet } from "react-router-dom";
 import { AdminSidebar } from "../components/AdminSidebar";
 import { AdminTopBar } from "../components/AdminTopBar";
 import { useAdminAuth } from "../hooks/useAdminAuth";
-import { admin } from "../strings/admin";
 import { useAdminSessionStore } from "../stores/adminSessionStore";
+import { admin } from "../strings/admin";
 
 export default function AdminRootLayout() {
   useAdminAuth();
@@ -23,9 +23,7 @@ export default function AdminRootLayout() {
     return (
       <div className="mx-auto max-w-md p-12 text-center">
         <h1 className="text-xl font-semibold">{admin.errors.forbidden}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          请使用管理员账户登录后访问
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">请使用管理员账户登录后访问</p>
         <a
           href="/auth/login"
           className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm text-primary-foreground"

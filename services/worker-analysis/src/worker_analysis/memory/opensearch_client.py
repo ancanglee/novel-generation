@@ -8,7 +8,6 @@ from uuid import UUID
 import boto3
 from opensearchpy import AsyncOpenSearch, AWSV4SignerAsyncAuth, RequestsHttpConnection
 
-
 INDEX_TEMPLATE_NAME = "facts-template"
 INDEX_TEMPLATE = {
     "index_patterns": ["facts-*"],

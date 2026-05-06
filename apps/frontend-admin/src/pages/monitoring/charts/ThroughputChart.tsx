@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
 import { Spinner } from "@novelgen/ui";
+import { Suspense, lazy } from "react";
 import type { MonitoringSummary } from "../../../hooks/useMonitoringQuery";
 
 const ReactECharts = lazy(() => import("echarts-for-react"));
@@ -14,7 +14,13 @@ export default function ThroughputChart({ summary }: { summary: MonitoringSummar
     series: [
       { name: "启动", type: "bar", stack: "t", data: [summary.totals.generations_started] },
       { name: "成功", type: "bar", stack: "t", data: [summary.totals.generations_succeeded] },
-      { name: "失败", type: "bar", stack: "t", data: [summary.totals.generations_failed], itemStyle: { color: "#e11d48" } },
+      {
+        name: "失败",
+        type: "bar",
+        stack: "t",
+        data: [summary.totals.generations_failed],
+        itemStyle: { color: "#e11d48" },
+      },
     ],
   };
   return (

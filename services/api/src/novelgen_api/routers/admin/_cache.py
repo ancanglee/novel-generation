@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from cachetools import TTLCache
@@ -12,7 +12,7 @@ _CACHE: TTLCache[tuple[int, int], dict[str, Any]] = TTLCache(maxsize=32, ttl=60)
 
 def minute_bucket(dt: datetime) -> int:
     """Align datetime to the start of its UTC minute → epoch-minute int."""
-    normalized = dt.astimezone(timezone.utc).replace(second=0, microsecond=0)
+    normalized = dt.astimezone(UTC).replace(second=0, microsecond=0)
     return int(normalized.timestamp() // 60)
 
 

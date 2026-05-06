@@ -18,7 +18,7 @@ _SCHEMA: dict[str, Any] = {
             "properties": {d: {"type": "string", "maxLength": 200} for d in _DIMS},
         },
     },
-    "required": list(_DIMS) + ["explanations"],
+    "required": [*list(_DIMS), "explanations"],
 }
 
 

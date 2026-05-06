@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import aioboto3
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel, Field
-
 from novelgen_auth.principal import PrincipalDep
 from novelgen_storage import build_team_pk
 from novelgen_types.identity import Principal
+from pydantic import BaseModel, Field
 
 from novelgen_api.deps import jobs_table, tenancy_table
 
@@ -55,7 +54,7 @@ class RewriteBody(BaseModel):
 @router.post("", response_model=GenerationRef, status_code=status.HTTP_201_CREATED)
 async def create_generation(body: CreateGenerationBody, principal: Principal = PrincipalDep) -> GenerationRef:
     generation_id = uuid4()
-    now = datetime.now(tz=timezone.utc).isoformat()
+    now = datetime.now(tz=UTC).isoformat()
     await tenancy_table().put(
         team_id=principal.team_id,
         item={
@@ -114,7 +113,7 @@ async def approve_outline(gid: UUID, principal: Principal = PrincipalDep) -> dic
         expression_names={"#s": "status"},
         expression_values={
             ":t": True, ":st": "APPROVED",
-            ":u": datetime.now(tz=timezone.utc).isoformat(),
+            ":u": datetime.now(tz=UTC).isoformat(),
         },
     )
     return {"generation_id": str(gid), "status": "APPROVED"}
@@ -173,7 +172,7 @@ async def _start_sfn(*, arn: str, principal: Principal, generation_id: UUID, job
     if not arn:
         raise HTTPException(status_code=500, detail={"error": {"code": "INTERNAL_SFN_NOT_CONFIGURED"}})
     job_id = uuid4()
-    now = datetime.now(tz=timezone.utc).isoformat()
+    now = datetime.now(tz=UTC).isoformat()
     await jobs_table().put(
         team_id=principal.team_id,
         item={

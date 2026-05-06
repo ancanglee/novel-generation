@@ -1,9 +1,9 @@
 import { Badge, Button } from "@novelgen/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import type { JobDto } from "../components/JobPoller";
 import { api } from "../lib/api";
 import { qk } from "../lib/queryKeys";
-import type { JobDto } from "../components/JobPoller";
 import { common } from "../strings";
 
 interface DashboardSummary {
@@ -23,9 +23,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-semibold">{common.nav.dashboard}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          快速进入你最近的小说与生成任务
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">快速进入你最近的小说与生成任务</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -38,7 +36,9 @@ export default function Dashboard() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-medium">最近任务</h2>
           <Link to="/novels">
-            <Button size="sm" variant="secondary">{common.nav.novels}</Button>
+            <Button size="sm" variant="secondary">
+              {common.nav.novels}
+            </Button>
           </Link>
         </div>
         <div className="rounded-lg border bg-card">
@@ -62,7 +62,11 @@ export default function Dashboard() {
             </ul>
           ) : (
             <p className="p-4 text-sm text-muted-foreground">
-              暂无任务，前往 <Link to="/novels" className="underline">小说库</Link> 开始
+              暂无任务，前往{" "}
+              <Link to="/novels" className="underline">
+                小说库
+              </Link>{" "}
+              开始
             </p>
           )}
         </div>

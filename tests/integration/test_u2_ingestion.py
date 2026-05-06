@@ -5,10 +5,9 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
-
 from worker_ingestion.chapter_splitter import split
 from worker_ingestion.parsers import get_parser
-from worker_ingestion.parsers.registry import *  # noqa: F401,F403
+from worker_ingestion.parsers.registry import *  # noqa: F403
 from worker_ingestion.robots import RobotsDenied, ensure_allowed
 from worker_ingestion.url_normalizer import cache_key
 

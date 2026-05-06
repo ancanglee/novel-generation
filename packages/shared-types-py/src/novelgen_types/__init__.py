@@ -34,10 +34,10 @@ from novelgen_types.job import Job, JobStatus, JobType
 from novelgen_types.novel import Novel, NovelSourceType, NovelStatus
 
 __all__ = [
-    "AuditAction",
-    "AuditEvent",
     "AlertMetric",
     "AlertRule",
+    "AuditAction",
+    "AuditEvent",
     "ConcurrencyConfig",
     "ConflictError",
     "ConflictItem",

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import boto3
@@ -24,7 +24,7 @@ _ddb = boto3.resource("dynamodb")
 
 def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     target_date = _resolve_target_date(event)
-    start = datetime.combine(target_date, datetime.min.time(), tzinfo=timezone.utc)
+    start = datetime.combine(target_date, datetime.min.time(), tzinfo=UTC)
     end = start + timedelta(days=1)
 
     rows = _aggregate_tokens(start, end)
@@ -53,7 +53,7 @@ def _resolve_target_date(event: dict[str, Any]):
     override = event.get("date") if event else None
     if override:
         return datetime.strptime(override, "%Y-%m-%d").date()
-    return (datetime.now(tz=timezone.utc) - timedelta(days=1)).date()
+    return (datetime.now(tz=UTC) - timedelta(days=1)).date()
 
 
 def _aggregate_tokens(start: datetime, end: datetime) -> dict[tuple[str, str, str], dict[str, int]]:

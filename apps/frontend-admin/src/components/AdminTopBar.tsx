@@ -1,7 +1,7 @@
 import { Button } from "@novelgen/ui";
 import { Link } from "react-router-dom";
-import { admin } from "../strings/admin";
 import { useAdminSessionStore } from "../stores/adminSessionStore";
+import { admin } from "../strings/admin";
 
 export function AdminTopBar() {
   const p = useAdminSessionStore((s) => s.principal);
@@ -13,7 +13,9 @@ export function AdminTopBar() {
       <div className="flex items-center gap-3">
         <span className="text-sm text-muted-foreground">{p?.email ?? ""}</span>
         <form action="/auth/logout" method="post">
-          <Button type="submit" size="sm" variant="ghost">{admin.nav.logout}</Button>
+          <Button type="submit" size="sm" variant="ghost">
+            {admin.nav.logout}
+          </Button>
         </form>
       </div>
     </header>

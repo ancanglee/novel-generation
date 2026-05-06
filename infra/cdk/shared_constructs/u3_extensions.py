@@ -83,7 +83,7 @@ def extend_messaging_stack(
     )
 
     asl_path = Path(__file__).resolve().parent.parent / "asl" / "analysis_workflow.json"
-    with open(asl_path, "r", encoding="utf-8") as fh:
+    with open(asl_path, encoding="utf-8") as fh:
         asl_body = fh.read()
 
     state_machine = sfn.StateMachine(

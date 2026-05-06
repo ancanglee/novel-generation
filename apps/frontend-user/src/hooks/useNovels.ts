@@ -30,7 +30,6 @@ export function useNovel(novelId: string | undefined) {
   return useQuery({
     enabled: Boolean(novelId),
     queryKey: novelId ? qk.novel(novelId) : ["novels", "none"],
-    queryFn: () =>
-      api.request<NovelSummaryDto>(`/api/v1/novels/${novelId}`),
+    queryFn: () => api.request<NovelSummaryDto>(`/api/v1/novels/${novelId}`),
   });
 }

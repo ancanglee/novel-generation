@@ -9,10 +9,38 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "a11y": {
+        "useSemanticElements": "off",
+        "useKeyWithClickEvents": "off",
+        "noLabelWithoutControl": "warn"
+      },
+      "correctness": {
+        "noInvalidPositionAtImportRule": "off",
+        "useExhaustiveDependencies": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn"
+      }
     }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "build", "cdk.out"]
+    "ignore": [
+      "node_modules",
+      "**/node_modules",
+      "dist",
+      "**/dist",
+      "build",
+      "**/build",
+      "cdk.out",
+      ".venv",
+      "aidlc-docs",
+      "**/__pycache__",
+      "pnpm-lock.yaml",
+      "uv.lock"
+    ]
   }
 }

@@ -18,13 +18,7 @@ const variantClasses: Record<ToastVariant, string> = {
   info: "border-sky-500/30 bg-sky-50 text-sky-900",
 };
 
-export function Toast({
-  variant = "info",
-  title,
-  description,
-  children,
-  onDismiss,
-}: ToastProps) {
+export function Toast({ variant = "info", title, description, children, onDismiss }: ToastProps) {
   return (
     <div
       role="status"
@@ -34,9 +28,7 @@ export function Toast({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold">{title}</p>
-          {description ? (
-            <p className="mt-1 text-sm opacity-90">{description}</p>
-          ) : null}
+          {description ? <p className="mt-1 text-sm opacity-90">{description}</p> : null}
           {children}
         </div>
         {onDismiss ? (

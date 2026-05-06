@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from jsonschema import Draft202012Validator
-
 from worker_generation.agents.outline import _SCHEMA as OUTLINE_SCHEMA
 from worker_generation.agents.outline_review import _SCHEMA as REVIEW_SCHEMA
 from worker_generation.agents.self_critique import _SCHEMA as CRITIQUE_SCHEMA

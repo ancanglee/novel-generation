@@ -17,8 +17,7 @@ export default function SettingsPage() {
   const principal = useSessionStore((s) => s.principal);
   const members = useQuery({
     queryKey: ["teams", "current", "members"] as const,
-    queryFn: () =>
-      api.request<TeamMembersResponse>("/api/v1/teams/current/members"),
+    queryFn: () => api.request<TeamMembersResponse>("/api/v1/teams/current/members"),
   });
 
   return (
@@ -32,9 +31,13 @@ export default function SettingsPage() {
           <dt className="text-muted-foreground">邮箱</dt>
           <dd>{principal?.email ?? "—"}</dd>
           <dt className="text-muted-foreground">用户角色</dt>
-          <dd><Badge>{principal?.globalRole ?? "—"}</Badge></dd>
+          <dd>
+            <Badge>{principal?.globalRole ?? "—"}</Badge>
+          </dd>
           <dt className="text-muted-foreground">Team 角色</dt>
-          <dd><Badge tone="info">{principal?.teamRole ?? "—"}</Badge></dd>
+          <dd>
+            <Badge tone="info">{principal?.teamRole ?? "—"}</Badge>
+          </dd>
         </dl>
       </section>
       <section className="rounded-lg border bg-card p-4">
@@ -60,7 +63,9 @@ export default function SettingsPage() {
         </div>
         {principal?.teamRole === "owner" ? (
           <div className="mt-4">
-            <Button size="sm" variant="secondary">邀请成员</Button>
+            <Button size="sm" variant="secondary">
+              邀请成员
+            </Button>
           </div>
         ) : null}
       </section>

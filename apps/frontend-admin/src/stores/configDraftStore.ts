@@ -1,9 +1,15 @@
 import { create } from "zustand";
 
 export type ModelStage =
-  | "classification" | "character" | "map" | "style"
-  | "outline" | "chapter" | "self_critique"
-  | "critic" | "consistency";
+  | "classification"
+  | "character"
+  | "map"
+  | "style"
+  | "outline"
+  | "chapter"
+  | "self_critique"
+  | "critic"
+  | "consistency";
 
 export interface ModelConfigDraft {
   stage: ModelStage;

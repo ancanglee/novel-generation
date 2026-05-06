@@ -105,7 +105,7 @@ class ModelConfigRepo:
                     audit_item,
                 ]
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             msg = str(exc)
             if "ConditionalCheckFailed" in msg or "TransactionCanceled" in msg:
                 raise OptimisticLockError(stage) from exc

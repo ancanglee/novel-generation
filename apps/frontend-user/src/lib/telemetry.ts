@@ -26,10 +26,10 @@ function isVisible(): boolean {
 export function emit(metric: TelemetryPayload): void {
   if (!isVisible()) return; // defer hidden-tab spam (lost is acceptable)
   const body = JSON.stringify(metric);
-  if (typeof navigator !== "undefined" && navigator.sendBeacon?.(
-    "/telemetry",
-    new Blob([body], { type: "application/json" }),
-  )) {
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.sendBeacon?.("/telemetry", new Blob([body], { type: "application/json" }))
+  ) {
     return;
   }
   // Fallback: fetch keepalive

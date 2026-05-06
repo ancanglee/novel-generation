@@ -33,22 +33,24 @@ export default function OutlinePage() {
 
   const approve = useMutation({
     mutationFn: () =>
-      api.request<{ generation_id: string }>(
-        `/api/v1/generations/${gid}/approve-outline`,
-        { method: "POST", body: { items: draft ?? outline.data?.items ?? [] } },
-      ),
+      api.request<{ generation_id: string }>(`/api/v1/generations/${gid}/approve-outline`, {
+        method: "POST",
+        body: { items: draft ?? outline.data?.items ?? [] },
+      }),
     onSuccess: () =>
-      api
-        .request(`/api/v1/generations/${gid}/start`, { method: "POST" })
-        .then(() => {
-          toast({ variant: "success", title: "大纲已批准，开始生成第 1 章" });
-          qc.invalidateQueries({ queryKey: qk.generation(gid!) });
-          navigate(`/generations/${gid}/chapters/1`);
-        }),
+      api.request(`/api/v1/generations/${gid}/start`, { method: "POST" }).then(() => {
+        toast({ variant: "success", title: "大纲已批准，开始生成第 1 章" });
+        qc.invalidateQueries({ queryKey: qk.generation(gid!) });
+        navigate(`/generations/${gid}/chapters/1`);
+      }),
   });
 
   if (outline.isLoading || !outline.data) {
-    return <div className="p-8 flex items-center gap-2"><Spinner /> 加载大纲…</div>;
+    return (
+      <div className="p-8 flex items-center gap-2">
+        <Spinner /> 加载大纲…
+      </div>
+    );
   }
 
   const items = draft ?? outline.data.items;

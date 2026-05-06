@@ -9,9 +9,7 @@ from typing import Any
 from uuid import UUID
 
 import aioboto3
-import boto3
 from cachetools import LRUCache
-
 from novelgen_memory.facade import MemoryFacade
 from novelgen_memory.models import CharacterSnapshot, GraphEdge, GraphNode, VectorHit
 from novelgen_obs import emit_metric, get_logger

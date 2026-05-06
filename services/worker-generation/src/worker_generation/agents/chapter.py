@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 from uuid import UUID
 
 from novelgen_obs import emit_metric, get_logger

@@ -3,12 +3,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { DataTable } from "../../components/DataTable";
-import { api } from "../../lib/api";
-import { adminQk } from "../../lib/adminQueryKeys";
 import { type AdminUserRow, useUsersQuery } from "../../hooks/useUsersQuery";
+import { adminQk } from "../../lib/adminQueryKeys";
+import { api } from "../../lib/api";
 
 export default function UsersPage() {
-  const [confirm, setConfirm] = useState<null | { user: AdminUserRow; kind: "disable" | "reset" }>(null);
+  const [confirm, setConfirm] = useState<null | { user: AdminUserRow; kind: "disable" | "reset" }>(
+    null,
+  );
   const qc = useQueryClient();
   const users = useUsersQuery();
 
@@ -40,8 +42,22 @@ export default function UsersPage() {
             { key: "email", header: "邮箱" },
             { key: "display_name", header: "显示名" },
             { key: "team_id", header: "Team", render: (r) => r.team_id.slice(0, 8) },
-            { key: "global_role", header: "角色", render: (r) => <Badge tone={r.global_role === "admin" ? "success" : "default"}>{r.global_role}</Badge> },
-            { key: "status", header: "状态", render: (r) => <Badge tone={r.status === "active" ? "success" : "danger"}>{r.status}</Badge> },
+            {
+              key: "global_role",
+              header: "角色",
+              render: (r) => (
+                <Badge tone={r.global_role === "admin" ? "success" : "default"}>
+                  {r.global_role}
+                </Badge>
+              ),
+            },
+            {
+              key: "status",
+              header: "状态",
+              render: (r) => (
+                <Badge tone={r.status === "active" ? "success" : "danger"}>{r.status}</Badge>
+              ),
+            },
             {
               key: "actions",
               header: "操作",

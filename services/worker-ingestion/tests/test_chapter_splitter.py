@@ -29,7 +29,7 @@ def test_splits_chinese_chapters():
 
 
 def test_splits_english_chapters():
-    chapters, conf = split_heuristic(_fake_english_novel())
+    chapters, _conf = split_heuristic(_fake_english_novel())
     assert len(chapters) == 7
     assert chapters[3].title.startswith("Chapter")
 
@@ -43,6 +43,6 @@ def test_unstructured_single_chapter_fallback():
 
 def test_md_h1_headings():
     md = "\n".join([f"# Part {i}\n\n{'word ' * 200}" for i in range(1, 7)])
-    chapters, conf = split_heuristic(md)
+    chapters, _conf = split_heuristic(md)
     assert len(chapters) == 6
     assert chapters[0].heading_level == 1

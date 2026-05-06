@@ -12,9 +12,7 @@ export default function NovelsPage() {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{common.nav.novels}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            上传、搜索公版书或抓取 URL 进行采集
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">上传、搜索公版书或抓取 URL 进行采集</p>
         </div>
       </header>
 
@@ -24,7 +22,9 @@ export default function NovelsPage() {
         <h2 className="mb-3 text-lg font-medium">已入库小说</h2>
         <div className="rounded-lg border bg-card">
           {novels.isLoading ? (
-            <div className="flex items-center gap-2 p-4"><Spinner /> <span className="text-sm">加载中…</span></div>
+            <div className="flex items-center gap-2 p-4">
+              <Spinner /> <span className="text-sm">加载中…</span>
+            </div>
           ) : novels.data?.items?.length ? (
             <ul className="divide-y">
               {novels.data.items.map((n) => (
@@ -34,12 +34,15 @@ export default function NovelsPage() {
                       {n.title}
                     </Link>
                     <p className="text-xs text-muted-foreground">
-                      {n.chapter_count} 章 · {n.source_type} · {new Date(n.created_at).toLocaleDateString()}
+                      {n.chapter_count} 章 · {n.source_type} ·{" "}
+                      {new Date(n.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <Link to={`/novels/${n.novel_id}`}>
-                      <Button size="sm" variant="secondary">详情</Button>
+                      <Button size="sm" variant="secondary">
+                        详情
+                      </Button>
                     </Link>
                     <Link to={`/novels/${n.novel_id}/analysis`}>
                       <Button size="sm">查看分析</Button>

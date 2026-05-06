@@ -11,9 +11,9 @@ from __future__ import annotations
 import aws_cdk as cdk
 from aws_cdk import aws_iam as iam
 from aws_cdk import custom_resources as cr
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.data_stack import DataStack
 from stacks.identity_stack import IdentityStack
 

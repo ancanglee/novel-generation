@@ -5,14 +5,12 @@ from __future__ import annotations
 import aws_cdk as cdk
 from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
-from aws_cdk import aws_scheduler_alpha as scheduler
-from aws_cdk import aws_scheduler_targets_alpha as scheduler_targets
 from aws_cdk import aws_sqs as sqs
 from aws_cdk import aws_stepfunctions as sfn
 from aws_cdk import aws_stepfunctions_tasks as sfn_tasks
+from config import EnvConfig
 from constructs import Construct
 
-from config import EnvConfig
 from stacks.data_stack import DataStack
 from stacks.identity_stack import IdentityStack
 

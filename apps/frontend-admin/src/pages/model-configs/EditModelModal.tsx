@@ -2,9 +2,9 @@ import { ApiConflictFrozenError } from "@novelgen/api-client";
 import { Button, Dialog, Toast } from "@novelgen/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { api } from "../../lib/api";
+import type { ModelConfigRow } from "../../hooks/useModelConfigsQuery";
 import { adminQk } from "../../lib/adminQueryKeys";
-import { type ModelConfigRow } from "../../hooks/useModelConfigsQuery";
+import { api } from "../../lib/api";
 
 const MODEL_OPTIONS = [
   "claude-opus-4-7",
@@ -67,7 +67,9 @@ export function EditModelModal({ row, onClose }: Props) {
       title={`编辑模型配置 · ${row.stage}`}
       footer={
         <>
-          <Button variant="ghost" size="sm" onClick={onClose}>取消</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            取消
+          </Button>
           <Button size="sm" loading={putMut.isPending} onClick={() => putMut.mutate()}>
             保存
           </Button>
@@ -82,7 +84,9 @@ export function EditModelModal({ row, onClose }: Props) {
             className="h-9 w-full rounded-md border px-2 text-sm"
           >
             {MODEL_OPTIONS.map((m) => (
-              <option key={m} value={m}>{m}</option>
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
         </Field>
@@ -107,9 +111,7 @@ export function EditModelModal({ row, onClose }: Props) {
             className="h-9 w-full rounded-md border px-2 text-sm"
           />
         </Field>
-        {error ? (
-          <Toast variant="error" title="保存失败" description={error} />
-        ) : null}
+        {error ? <Toast variant="error" title="保存失败" description={error} /> : null}
       </div>
     </Dialog>
   );

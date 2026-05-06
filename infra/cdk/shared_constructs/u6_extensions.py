@@ -17,8 +17,8 @@ from aws_cdk import aws_cloudfront_origins as cf_origins
 from aws_cdk import aws_cloudwatch as cw
 from aws_cdk import aws_cloudwatch_actions as cw_actions
 from aws_cdk import aws_ec2 as ec2
-from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
+from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_s3 as s3
@@ -198,7 +198,7 @@ def extend_edge_stack(
         alb,
         protocol_policy=cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
     )
-    s3_origin = cf_origins.S3Origin(
+    cf_origins.S3Origin(
         novels_bucket,
         origin_path="/frontend",
     )
@@ -377,7 +377,7 @@ def apply_u6_extensions(
         and execution_role is not None
         and session_signing_secret is not None
     ):
-        service, bff_tg = extend_compute_stack(
+        _service, bff_tg = extend_compute_stack(
             stack,
             cfg,
             cluster=cluster,

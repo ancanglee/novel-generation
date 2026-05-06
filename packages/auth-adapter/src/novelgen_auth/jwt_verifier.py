@@ -5,7 +5,6 @@ Meets NFR-3.1 (p99 < 200ms authentication) by caching JWKs locally.
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass
 from typing import Any
 
@@ -13,7 +12,6 @@ import httpx
 import jwt
 from cachetools import TTLCache
 from jwt.algorithms import RSAAlgorithm
-
 from novelgen_types.errors import AuthError
 
 

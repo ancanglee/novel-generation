@@ -7,9 +7,8 @@ and writes a GEN_CONTEXT row with 24h TTL for worker-generation to consume.
 
 from __future__ import annotations
 
-import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import boto3
@@ -35,7 +34,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     # empty and the ChapterAgent will render a fallback block.
     style_reference_excerpts: list[str] = []
 
-    ttl = int((datetime.now(tz=timezone.utc) + timedelta(hours=24)).timestamp())
+    ttl = int((datetime.now(tz=UTC) + timedelta(hours=24)).timestamp())
     chapter_count = int(gen.get("target_chapter_count", 0))
 
     _jobs.put_item(

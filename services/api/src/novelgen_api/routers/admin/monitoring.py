@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, Query
-
 from novelgen_types.identity import Principal
 
 from novelgen_api.services.cloudwatch_aggregator import (
@@ -27,7 +26,7 @@ def _parse_dt(raw: str) -> datetime:
     except ValueError as exc:
         raise HTTPException(400, {"error": {"code": "INVALID_DATETIME"}}) from exc
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 
@@ -48,7 +47,7 @@ async def get_monitoring_summary(
 
     try:
         summary = await _AGGREGATOR.fetch_summary(SummaryRequest(from_=f, to=t))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(
             503,
             {

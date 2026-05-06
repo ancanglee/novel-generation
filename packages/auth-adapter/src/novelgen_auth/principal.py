@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
 from fastapi import Depends, Header, HTTPException, Request
-
 from novelgen_types.errors import AuthError
 from novelgen_types.identity import GlobalRole, Principal, TeamRole
 
@@ -56,7 +55,7 @@ def build_principal_from_claims(claims: dict[str, Any], request_id: str = "") ->
         email=claims.get("email", ""),
         global_role=_map_global_role(groups),
         team_role=_parse_team_role(claims.get("custom:team_roles"), team_id),
-        jwt_expiry=datetime.fromtimestamp(claims["exp"], tz=timezone.utc),
+        jwt_expiry=datetime.fromtimestamp(claims["exp"], tz=UTC),
         request_id=request_id,
     )
 

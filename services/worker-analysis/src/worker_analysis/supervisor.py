@@ -5,11 +5,11 @@ Implements R1 (Supervisor with 50-step / 15min hard limits) and F1=B Supervisor 
 
 from __future__ import annotations
 
-import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
-from typing import Any, Awaitable, Callable
+from typing import Any
 from uuid import UUID
 
 from novelgen_obs import emit_metric, get_logger
@@ -106,6 +106,8 @@ class Supervisor:
                 last_call_count += 1
                 if last_call_count >= 2:
                     ctx.warnings.append(f"skipping repeated call: {tool}")
+                    # 记录哨兵以推进 step_count（len(step_history)），避免死循环。
+                    ctx.step_history.append(f"skipped:{tool}")
                     continue
             else:
                 last_call = sig

@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
 import aioboto3
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-
 from novelgen_types.critique import (
     ConflictItem,
     ConflictType,
     ConsistencyReport,
     UserAction,
 )
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from .context import ConsistencyContext, render_prompt
 
@@ -131,7 +130,7 @@ class ConsistencyAgent:
         raw_conflicts: list[dict[str, Any]],
         ctx: ConsistencyContext,
     ) -> tuple[ConsistencyReport, list[ConflictItem]]:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         conflicts: list[ConflictItem] = []
         for raw in raw_conflicts:
             ci = ConflictItem(
@@ -179,5 +178,5 @@ def minimal_failure_report(ctx: ConsistencyContext) -> ConsistencyReport:
         conflict_ids=[],
         memory_unavailable=ctx.memory_unavailable,
         minimal=True,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )

@@ -5,11 +5,10 @@ from __future__ import annotations
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Header, HTTPException, UploadFile, status
-from pydantic import BaseModel, HttpUrl
-
 from novelgen_auth.principal import PrincipalDep
 from novelgen_storage import build_team_pk
 from novelgen_types.identity import Principal
+from pydantic import BaseModel, HttpUrl
 
 from novelgen_api.deps import tenancy_table
 from novelgen_api.services.ingestion_service import (
@@ -84,9 +83,8 @@ async def upload_novel(
     if existing := await idempotency_lookup(principal.team_id, idempotency_key):
         return JobRef(job_id=uuid4(), novel_id=existing, status="IDEMPOTENT")
 
-    if not force:
-        if conflict_id := await find_existing_by_title(principal.team_id, title):
-            raise TitleExistsError(conflict_id)
+    if not force and (conflict_id := await find_existing_by_title(principal.team_id, title)):
+        raise TitleExistsError(conflict_id)
 
     content = await file.read()
     if len(content) > MAX_UPLOAD_BYTES:

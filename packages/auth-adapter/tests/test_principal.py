@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
-
+from novelgen_auth.principal import build_principal_from_claims
 from novelgen_types.errors import AuthError
 from novelgen_types.identity import GlobalRole, TeamRole
-
-from novelgen_auth.principal import build_principal_from_claims
 
 
 def _make_claims(**overrides: object) -> dict[str, object]:
@@ -18,7 +16,7 @@ def _make_claims(**overrides: object) -> dict[str, object]:
         "sub": str(uuid4()),
         "custom:team_id": str(uuid4()),
         "email": "alice@example.com",
-        "exp": int((datetime.now(tz=timezone.utc) + timedelta(hours=1)).timestamp()),
+        "exp": int((datetime.now(tz=UTC) + timedelta(hours=1)).timestamp()),
     }
     base.update(overrides)
     return base
@@ -58,7 +56,7 @@ def test_missing_team_id_raises() -> None:
     claims = {
         "sub": str(uuid4()),
         "email": "a@b.com",
-        "exp": int(datetime.now(tz=timezone.utc).timestamp()) + 3600,
+        "exp": int(datetime.now(tz=UTC).timestamp()) + 3600,
     }
     with pytest.raises(AuthError):
         build_principal_from_claims(claims)

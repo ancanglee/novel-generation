@@ -25,7 +25,7 @@ def tables():
                 ],
                 AttributeDefinitions=[
                     {"AttributeName": "pk", "AttributeType": "S"},
-                    {"AttributeName": "sk", "KeyType": "RANGE", "AttributeType": "S"},
+                    {"AttributeName": "sk", "AttributeType": "S"},
                 ],
                 BillingMode="PAY_PER_REQUEST",
             )

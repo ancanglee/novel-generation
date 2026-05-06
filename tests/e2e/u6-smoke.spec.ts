@@ -3,15 +3,18 @@
 // test either uses MSW / Playwright route interception or a staging API.
 // Build-and-Test phase will extend this with backend fixtures.
 
-import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { expect, test } from "@playwright/test";
 
 test.describe("U6 user smoke", () => {
   test("shows login prompt when unauthenticated", async ({ page }) => {
     await page.route("**/auth/me", (route) =>
-      route.fulfill({ status: 401, body: JSON.stringify({
-        error: { code: "UNAUTHENTICATED", message: "未登录", request_id: "x" },
-      }) }),
+      route.fulfill({
+        status: 401,
+        body: JSON.stringify({
+          error: { code: "UNAUTHENTICATED", message: "未登录", request_id: "x" },
+        }),
+      }),
     );
     await page.goto("/");
     await expect(page.getByText("欢迎使用 NovelGen")).toBeVisible();
@@ -50,9 +53,7 @@ test.describe("U6 user smoke", () => {
     await expect(page.getByRole("heading", { name: "仪表盘" })).toBeVisible();
     await expect(page.getByText("小说库")).toBeVisible();
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa"])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
     const serious = results.violations.filter(
       (v) => v.impact === "serious" || v.impact === "critical",
     );
