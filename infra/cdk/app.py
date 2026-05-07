@@ -12,6 +12,7 @@ from stacks.identity_stack import IdentityStack
 from stacks.messaging_stack import MessagingStack
 from stacks.network_stack import NetworkStack
 from stacks.observability_stack import ObservabilityStack
+from stacks.waf_stack import WafStack
 
 
 def main() -> None:
@@ -42,7 +43,24 @@ def main() -> None:
         env=env,
     )
 
-    EdgeStack(app, f"{cfg.prefix}-edge", cfg=cfg, compute=compute, env=env)
+    waf_env = cdk.Environment(account=cfg.account, region="us-east-1")
+    waf = WafStack(
+        app,
+        f"{cfg.prefix}-waf",
+        cfg=cfg,
+        env=waf_env,
+        cross_region_references=True,
+    )
+
+    EdgeStack(
+        app,
+        f"{cfg.prefix}-edge",
+        cfg=cfg,
+        compute=compute,
+        waf=waf,
+        env=env,
+        cross_region_references=True,
+    )
 
     ObservabilityStack(
         app, f"{cfg.prefix}-observability", cfg=cfg, data=data, compute=compute, env=env

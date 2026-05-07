@@ -1137,3 +1137,17 @@ U5 增量资源约 12 个元素。更新 `U5-nfr-design-plan.md` checkboxes 为 
 **Context**: U5 Code Generation 轮 1 Agent 核心完成，等待用户批准进入轮 2
 
 ---
+
+## Deploy Pre-flight — us-west-2 部署调整
+**Timestamp**: 2026-05-07T00:00:00Z
+**User Input**: "部署目标切换到 AWS us-west-2。由 Code-Agent 并行执行：补齐缺失 Dockerfile、把默认 region 从 us-east-1 改为 us-west-2、创建本地 .env（不设 profile）、grep Bedrock 模型引用以评估跨区域 inference profile 风险、不动模型 ID。"
+**AI Response**: 执行 4 项代码/配置调整：
+- **Dockerfile 补齐 (2 文件)**：
+  - `apps/frontend-admin/Dockerfile`：Node 20 pnpm 多阶段构建，runner 使用 `nginx:1.27-alpine`，监听 3001（与 `infra/cdk/stacks/compute_stack.py` `front_admin_service` port=3001 对齐），`base=/admin/` + SPA fallback + `/healthz` 200。
+  - `services/worker-moderation/Dockerfile` + `pyproject.toml` + `src/worker_moderation/{__init__,main}.py` + `tests/test_smoke.py`：Python 3.12-slim + uv，复刻 worker-critic 模板。由于 U5 已确认 worker-moderation 是 V2 预留（`desired_count=0`），`main.py` 实现为 signal-respecting idle loop（`MODERATION_ENABLED=1` + `MODERATION_QUEUE_URL` 时 long-poll 并 stub drop；否则 60s 心跳）。目的：让 U1 预建 ECR/ECS 有可推送的镜像，V2 激活 ModerationAgent 时替换 agent/context 逻辑即可。
+- **Region 切换 us-east-1 → us-west-2 (4 文件)**：`scripts/bootstrap-cdk.sh`、`scripts/deploy-dev.sh`、`infra/cdk/config.py`、`.env.example`（`AWS_REGION` + `BEDROCK_REGION`）。
+- **本地 .env 创建**：`/home/ec2-user/novel-generation/.env`，`AWS_REGION=us-west-2` / `BEDROCK_REGION=us-west-2` / `AWS_PROFILE=`（使用默认凭证链）。
+- **Bedrock 模型 ID grep（暂不修改）**：共发现 10 个源码引用 `anthropic.claude-*-v1:0`（`packages/shared-types-py/src/novelgen_types/config.py` 1 处 mapping、`services/worker-analysis/` 7 处 agent model_id 默认值、`services/worker-generation/` 3 处、`services/worker-ingestion/llm_chapter_splitter.py` 1 处）+ 文档引用若干。在 us-west-2，Claude Opus 4.7 / Sonnet 4.6-4.7 / Haiku 4.5 通常要求跨区域 inference profile（`us.` 前缀）。按用户要求保留 bare model ID，部署期若 Bedrock Converse 报 `ValidationException: on-demand throughput isn't supported`，再统一改为 `us.anthropic.claude-*` inference profile ID。
+**Context**: Code-Agent pre-flight 完成，交接给 AWS-Agent 执行 Docker build / ECR push / CDK bootstrap / deploy。未解决风险：(1) Bedrock inference profile 前缀需首轮 Converse 调用验证；(2) worker-moderation stub 在 `desired_count=0` 时永不启动，CDK 当前未显式设置 `desired_count=0`（compute_stack 默认 `desired_count=1`），部署后需确认是否需手动 `aws ecs update-service --desired-count 0` 或在 CDK 中固化。
+
+---

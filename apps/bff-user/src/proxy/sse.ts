@@ -1,3 +1,4 @@
+import type { Readable } from "node:stream";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { request as undiciRequest } from "undici";
 import type { AppConfig } from "../config";
@@ -25,10 +26,10 @@ export async function proxySse(
   };
   if (typeof lastEventId === "string") upstreamHeaders["last-event-id"] = lastEventId;
 
-  let upstreamBody: NodeJS.ReadableStream | null = null;
+  let upstreamBody: Readable | null = null;
   const onClientClose = (): void => {
     try {
-      upstreamBody?.destroy?.();
+      upstreamBody?.destroy();
     } catch {
       /* noop */
     }
@@ -52,7 +53,7 @@ export async function proxySse(
       reply.raw.end();
       return;
     }
-    upstreamBody = upstream.body as unknown as NodeJS.ReadableStream;
+    upstreamBody = upstream.body as unknown as Readable;
     upstreamBody.on("data", (chunk: Buffer) => {
       reply.raw.write(chunk);
     });

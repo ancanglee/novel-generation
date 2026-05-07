@@ -45,7 +45,7 @@ class AgentCoreStack(cdk.Stack):
         policy = cr.AwsCustomResourcePolicy.from_statements(
             [
                 iam.PolicyStatement(
-                    actions=["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+                    actions=["logs:DescribeLogGroups"],
                     resources=["*"],
                 )
             ]
@@ -55,7 +55,7 @@ class AgentCoreStack(cdk.Stack):
             self,
             "AgentCorePlaceholder",
             on_create=cr.AwsSdkCall(
-                service="Logs",
+                service="CloudWatchLogs",
                 action="describeLogGroups",
                 parameters={"limit": 1},
                 physical_resource_id=cr.PhysicalResourceId.of(f"{cfg.prefix}-agentcore-placeholder"),

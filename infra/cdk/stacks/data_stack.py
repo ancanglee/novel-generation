@@ -106,7 +106,11 @@ class DataStack(cdk.Stack):
             encryption=s3.BucketEncryption.S3_MANAGED,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             intelligent_tiering_configurations=[
-                s3.IntelligentTieringConfiguration(name="default")
+                s3.IntelligentTieringConfiguration(
+                    name="default",
+                    archive_access_tier_time=cdk.Duration.days(90),
+                    deep_archive_access_tier_time=cdk.Duration.days(180),
+                )
             ],
             lifecycle_rules=[
                 s3.LifecycleRule(

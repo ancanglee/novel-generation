@@ -3,7 +3,8 @@ import { useAdminSessionStore } from "../stores/adminSessionStore";
 
 function getCsrfToken(): string {
   const match = /(?:^|;\s*)csrf=([^;]+)/.exec(document.cookie);
-  return match ? decodeURIComponent(match[1]) : "";
+  const val = match?.[1];
+  return val ? decodeURIComponent(val) : "";
 }
 
 export const api = new ApiClient({

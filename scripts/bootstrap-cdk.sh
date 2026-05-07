@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ACCOUNT="${AWS_ACCOUNT:-$(aws sts get-caller-identity --query Account --output text)}"
-REGION="${AWS_REGION:-us-east-1}"
+REGION="${AWS_REGION:-us-west-2}"
 
 echo "Bootstrapping CDK in aws://${ACCOUNT}/${REGION}"
 cd "$(dirname "$0")/../infra/cdk"

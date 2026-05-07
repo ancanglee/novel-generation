@@ -116,8 +116,6 @@ class IdentityStack(cdk.Stack):
             ),
             supported_identity_providers=[
                 cognito.UserPoolClientIdentityProvider.COGNITO,
-                cognito.UserPoolClientIdentityProvider.GOOGLE,
-                cognito.UserPoolClientIdentityProvider.custom("GitHub"),
             ],
             prevent_user_existence_errors=True,
         )

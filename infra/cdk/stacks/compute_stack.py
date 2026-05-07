@@ -215,8 +215,18 @@ class ComputeStack(cdk.Stack):
         task_def.add_container(
             "Container",
             image=ecs.ContainerImage.from_registry(
-                "public.ecr.aws/amazonlinux/amazonlinux:2023"  # placeholder before first push
+                "public.ecr.aws/nginx/nginx:stable-alpine"  # placeholder before first push
             ),
+            command=[
+                "sh",
+                "-c",
+                (
+                    "mkdir -p /usr/share/nginx/html && "
+                    "echo ok > /usr/share/nginx/html/healthz && "
+                    f"sed -i 's/listen       80;/listen       {port};/' /etc/nginx/conf.d/default.conf && "
+                    "nginx -g 'daemon off;'"
+                ),
+            ],
             logging=ecs.LogDriver.aws_logs(
                 stream_prefix=name,
                 log_group=logs.LogGroup(
@@ -300,8 +310,9 @@ class ComputeStack(cdk.Stack):
         task_def.add_container(
             "Container",
             image=ecs.ContainerImage.from_registry(
-                "public.ecr.aws/amazonlinux/amazonlinux:2023"
+                "public.ecr.aws/docker/library/busybox:stable"
             ),
+            command=["sh", "-c", "while true; do sleep 3600; done"],
             logging=ecs.LogDriver.aws_logs(
                 stream_prefix=f"worker-{wt}",
                 log_group=logs.LogGroup(

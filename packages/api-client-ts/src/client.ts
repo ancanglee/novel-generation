@@ -87,7 +87,8 @@ export function createDefaultClient(): ApiClient {
   return new ApiClient({
     getCsrfToken: () => {
       const match = /(?:^|;\s*)csrf=([^;]+)/.exec(document.cookie);
-      return match ? decodeURIComponent(match[1]) : "";
+      const val = match?.[1];
+      return val ? decodeURIComponent(val) : "";
     },
     onUnauthenticated: () => {
       if (!window.location.pathname.startsWith("/auth/")) {

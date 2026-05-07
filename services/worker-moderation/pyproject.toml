@@ -1,0 +1,29 @@
+[project]
+name = "novelgen-worker-moderation"
+version = "0.1.0"
+description = "V2-reserved Moderation worker. U1 pre-builds image/service; desired_count=0 until V2 activation."
+requires-python = ">=3.12"
+dependencies = [
+    "novelgen-types",
+    "novelgen-auth-adapter",
+    "novelgen-storage-adapter",
+    "novelgen-obs-adapter",
+    "novelgen-memory-facade",
+    "aioboto3>=13.0,<14",
+    "boto3>=1.35",
+    "pydantic>=2.8",
+]
+
+[tool.uv.sources]
+novelgen-types = { workspace = true }
+novelgen-auth-adapter = { workspace = true }
+novelgen-storage-adapter = { workspace = true }
+novelgen-obs-adapter = { workspace = true }
+novelgen-memory-facade = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/worker_moderation"]

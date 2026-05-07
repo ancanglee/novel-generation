@@ -4,7 +4,7 @@
 set -euo pipefail
 
 export NOVELGEN_ENV="${NOVELGEN_ENV:-dev}"
-export AWS_REGION="${AWS_REGION:-us-east-1}"
+export AWS_REGION="${AWS_REGION:-us-west-2}"
 
 echo "Deploying NovelGen to ${NOVELGEN_ENV} in ${AWS_REGION}..."
 
