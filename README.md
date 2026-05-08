@@ -7,7 +7,7 @@
 - 异步编排：SQS + EventBridge + Step Functions
 - 数据：DynamoDB × 4、S3 × 4、Neptune Serverless、OpenSearch Serverless
 - 模型：Bedrock Claude Opus 4.7 / Sonnet 4.6–4.7 / Haiku 4.5
-- 代理：AgentCore Memory / Runtime / Gateway / Browser（preview）
+- 代理：AgentCore Memory / Runtime / Gateway / Browser / Identity / Observability（6 子服务全部经 U8 用真实 SDK 接入，详见 `docs/ARCHITECTURE.md § 12`）
 
 > 完整架构图与业务流请读 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
 
@@ -107,9 +107,9 @@
      - Anthropic Claude Sonnet 4.7（`anthropic.claude-sonnet-4-7-v1:0`）
      - Anthropic Claude Haiku 4.5（`anthropic.claude-haiku-4-5-v1:0`）
    - 等到状态变成 **Access granted**（通常 1–10 分钟）再继续。
-3. **申请 AgentCore preview**：
-   - 控制台 → Bedrock AgentCore → 如果提示 preview allow-list，提交申请并等待白名单通过。
-   - 要用到 Memory / Runtime / Gateway / Browser 4 个子服务。
+3. **确认 AgentCore 可用**：
+   - 控制台 → Bedrock AgentCore，确认目标 region（`us-west-2`）能打开 Memory / Runtime / Gateway / Browser / Identity 页面；若仍处于 allow-list，需先完成白名单申请。
+   - 本项目 U8 需要全部 6 个子服务：Memory / Runtime / Gateway / Browser / Identity / Observability。
 4. **配额检查**（Service Quotas 控制台）：
    - Bedrock：目标模型的 `Tokens per minute` / `Requests per minute`（按预估流量申请）
    - VPC：每区域 Elastic IP（NAT Gateway 要 1 个）

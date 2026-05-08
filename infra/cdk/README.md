@@ -9,7 +9,7 @@
 5. `compute` — ECS Cluster, ECR ×8, 8 Fargate services (Spot for workers), ALB + TG + rules
 6. `edge` — CloudFront ×2 (user + admin), WAF
 7. `observability` — CloudWatch log groups, metric filters, alarms → SNS, daily aggregator/archiver λ
-8. `agentcore` — AgentCore placeholder (replace when CFN resources GA)
+8. `agentcore` — **real** AgentCore provisioning: Memory ×1 / WorkloadIdentity ×1 / Gateway ×1 + Target ×6 / AgentRuntime ×5 (driven by `bootstrap/agentcore_bootstrap/handler.py` via `bedrock-agentcore-control` SDK). See `stacks/agentcore_stack.py` and `docs/ARCHITECTURE.md § 12`.
 
 ## Commands
 
@@ -30,7 +30,7 @@ cdk deploy --all --require-approval never   # dev only
 
 ## Known caveats
 
-- AgentCore stack is a placeholder (see `stacks/agentcore_stack.py`).
+- AgentCore stack now provisions real resources via the bootstrap Lambda; after `cdk deploy novelgen-*-agentcore` verify the SSM params under `/novelgen/{env}/agentcore/*` are populated.
 - `IdentityStack` uses placeholder OIDC issuer for GitHub; wire real OAuth client ID/secret via `google-client-id` SSM parameter + secrets post-deploy.
 - `ComputeStack` references `public.ecr.aws/amazonlinux` images; replace with per-service images after first `docker build && docker push` to ECR.
 - Neptune Serverless IAM auth: callers must SigV4-sign requests (handled in U3 MemoryFacade).

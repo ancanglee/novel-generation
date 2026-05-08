@@ -271,11 +271,12 @@ class AgentCoreStack(cdk.Stack):
             if tool_name == "ingestion-browser":
                 env_vars["AGENTCORE_BROWSER_IDENTIFIER"] = "DEFAULT"
             if tool_name == "graph-ops":
-                env_vars["NEPTUNE_ENDPOINT"] = cdk.Fn.import_value(
-                    f"{cfg.prefix}-neptune-endpoint"
-                ) if False else ""  # placeholder wiring; real stack passes it via constructor later
+                # Neptune cluster writer endpoint (https://<hostport>); add scheme.
+                env_vars["NEPTUNE_ENDPOINT"] = (
+                    f"https://{data.neptune_cluster.cluster_endpoint.socket_address}"
+                )
             if tool_name == "vector-ops":
-                env_vars["OPENSEARCH_ENDPOINT"] = ""
+                env_vars["OPENSEARCH_ENDPOINT"] = data.aoss_collection.attr_collection_endpoint
 
             fn = _lambda.Function(
                 self,
