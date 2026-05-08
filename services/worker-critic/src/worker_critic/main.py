@@ -214,6 +214,12 @@ class WorkerCritic:
 
 
 async def _amain() -> None:
+    try:
+        from novelgen_obs import init_observability
+
+        init_observability("worker-critic", os.environ.get("ENV", "dev"))
+    except ImportError:
+        pass
     worker = WorkerCritic()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGTERM, signal.SIGINT):

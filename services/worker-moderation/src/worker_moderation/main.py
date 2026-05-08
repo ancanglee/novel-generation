@@ -92,6 +92,12 @@ class WorkerModeration:
 
 
 async def _amain() -> None:
+    try:
+        from novelgen_obs import init_observability
+
+        init_observability("worker-moderation", _ENV)
+    except ImportError:
+        pass
     worker = WorkerModeration()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGTERM, signal.SIGINT):

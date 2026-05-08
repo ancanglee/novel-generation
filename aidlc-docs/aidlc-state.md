@@ -33,21 +33,37 @@
 - [x] Units Generation
 
 ### 🟢 Construction 阶段
-- [x] Functional Design（每个 Unit，U1-U7）— 已完成
-- [x] NFR Requirements（每个 Unit，U1-U7）— 已完成
-- [x] NFR Design（每个 Unit，U1-U7）— 已完成
-- [x] Infrastructure Design（每个 Unit，U1-U7）— 已完成
-- [x] Code Generation（每个 Unit，U1-U7）— 已完成
-- [x] Build and Test — 已完成
+- [x] Functional Design（每个 Unit，U1-U7 + U8）— 已完成
+- [x] NFR Requirements（每个 Unit，U1-U7 + U8）— 已完成
+- [x] NFR Design（每个 Unit，U1-U7 + U8）— 已完成
+- [x] Infrastructure Design（每个 Unit，U1-U7 + U8）— 已完成
+- [x] Code Generation（每个 Unit，U1-U7 + U8）— 已完成
+- [x] Build and Test — 已完成（U8 集成测试骨架待在 CI 接实 AWS 账号后运行）
 
 ### 🟡 Operations 阶段
 - [ ] Operations — 占位（V2）
 
 ## 当前状态
 - **生命周期阶段**：Construction
-- **当前阶段**：Build and Test 已完成
+- **当前阶段**：U8 AgentCore Full Integration 已完成
 - **下一阶段**：Operations（占位 — V2）
-- **状态**：✅ Construction 阶段全部完成（U1-U7 + Build and Test）
+- **状态**：✅ Construction 阶段全部完成（U1-U7 + U8 + Build and Test）
+
+## Units 清单
+- U1 Platform & Infrastructure — ✅
+- U2 Ingestion Service — ✅
+- U3 Understanding Agents — ✅
+- U4 Generation Agents — ✅
+- U5 Critic / Consistency / Moderation — ✅
+- U6 Frontend (User) + BFF — ✅
+- U7 Admin (Frontend + API) — ✅
+- **U8 AgentCore Full Integration — ✅（本轮新增，2026-05-08）**
+  - 重写 `infra/cdk/stacks/agentcore_stack.py` + bootstrap Lambda
+  - 新增 2 packages：`agentcore-runtime-client` / `agentcore-gateway-client`
+  - 升级 3 clients：`agentcore_memory.py` / `workload_identity.py` / `tier2_browser.py`
+  - 新增 6 Gateway target Lambdas：`lambdas/gateway-{memory-facade,graph-ops,vector-ops,ingestion-fetch,ingestion-browser,ddb-jobs}/`
+  - 新增 OTEL bootstrap：`novelgen_obs.otel_bootstrap.init_observability`
+  - MemoryFacadeImpl 去除静默容错，Memory 成为权威存储
 
 ## 初始用户需求摘要
 用户希望构建一个**小说仿写生成应用**：

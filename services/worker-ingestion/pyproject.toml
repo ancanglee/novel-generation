@@ -23,6 +23,7 @@ dependencies = [
     "trafilatura~=1.12",
     "lxml~=5.3",
     "pydantic>=2.8",
+    "playwright>=1.49",
 ]
 
 [tool.uv.sources]

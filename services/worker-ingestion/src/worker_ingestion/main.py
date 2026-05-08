@@ -16,7 +16,7 @@ from uuid import UUID
 
 import aioboto3
 from novelgen_browser_pool import BrowserPool
-from novelgen_obs import get_logger, set_request_id
+from novelgen_obs import get_logger, init_observability, set_request_id
 from novelgen_storage import DynamoDBAdapter, S3Adapter
 
 from worker_ingestion.pipeline import Pipeline, PipelineJob
@@ -27,11 +27,12 @@ QUEUE_URL = os.environ["INGESTION_QUEUE_URL"]
 NOVELS_BUCKET = os.environ["NOVELS_BUCKET"]
 TENANCY_TABLE = os.environ["TENANCY_TABLE"]
 JOBS_TABLE = os.environ["JOBS_TABLE"]
-REGION = os.environ.get("AWS_REGION", "us-east-1")
+REGION = os.environ.get("AWS_REGION", "us-west-2")
 MAX_CONCURRENCY = int(os.environ.get("INGESTION_MAX_CONCURRENCY", "5"))
 
 
 async def _run() -> None:
+    init_observability("worker-ingestion", os.environ.get("ENV", "dev"))
     session = aioboto3.Session()
     stop_event = asyncio.Event()
     _install_signal_handlers(stop_event)

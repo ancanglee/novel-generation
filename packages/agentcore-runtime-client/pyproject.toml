@@ -1,0 +1,21 @@
+[project]
+name = "novelgen-agentcore-runtime"
+version = "0.1.0"
+description = "Thin async wrapper around bedrock-agentcore (data plane) and bedrock-agentcore-control (control plane) Runtime APIs"
+requires-python = ">=3.12"
+dependencies = [
+    "novelgen-types",
+    "aioboto3>=13.0,<14",
+    "boto3>=1.34",
+    "tenacity>=8.2",
+]
+
+[tool.uv.sources]
+novelgen-types = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/novelgen_agentcore_runtime"]

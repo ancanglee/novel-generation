@@ -11,7 +11,7 @@ from typing import Any
 from uuid import UUID
 
 import aioboto3
-from novelgen_obs import get_logger, set_request_id
+from novelgen_obs import get_logger, init_observability, set_request_id
 from novelgen_storage import DynamoDBAdapter, S3Adapter, build_s3_prefix, build_team_pk
 
 from worker_generation.agents import (
@@ -48,6 +48,7 @@ class _DdbJobReader:
 
 
 async def _run() -> None:
+    init_observability("worker-generation", os.environ.get("ENV", "dev"))
     session = aioboto3.Session()
     stop_event = asyncio.Event()
     _install_signal_handlers(stop_event)

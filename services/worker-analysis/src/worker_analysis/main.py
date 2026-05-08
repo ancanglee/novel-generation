@@ -13,7 +13,7 @@ from typing import Any
 from uuid import UUID
 
 import aioboto3
-from novelgen_obs import get_logger, set_request_id
+from novelgen_obs import get_logger, init_observability, set_request_id
 from novelgen_storage import DynamoDBAdapter, S3Adapter, build_s3_prefix
 
 from worker_analysis.agentcore_registration import AgentCoreRegistrar
@@ -42,24 +42,33 @@ TENANCY_TABLE = os.environ["TENANCY_TABLE"]
 JOBS_TABLE = os.environ["JOBS_TABLE"]
 NEPTUNE_ENDPOINT = os.environ.get("NEPTUNE_ENDPOINT", "")
 OPENSEARCH_ENDPOINT = os.environ.get("OPENSEARCH_ENDPOINT", "")
-REGION = os.environ.get("AWS_REGION", "us-east-1")
+REGION = os.environ.get("AWS_REGION", "us-west-2")
 ENV = os.environ.get("ENV", "dev")
+AGENTCORE_MEMORY_ID = os.environ.get("AGENTCORE_MEMORY_ID", "")
 
 
 async def _run() -> None:
+    init_observability("worker-analysis", ENV)
+
     session = aioboto3.Session()
     stop_event = asyncio.Event()
     _install_signal_handlers(stop_event)
 
     jobs_table = DynamoDBAdapter(JOBS_TABLE, region=REGION)
-    registrar = AgentCoreRegistrar(jobs_table, agent_id=f"novelgen-understanding-{ENV}", env=ENV)
+    registrar = AgentCoreRegistrar(
+        jobs_table,
+        agent_id=f"novelgen-understanding-{ENV}",
+        env=ENV,
+        region=REGION,
+    )
     await registrar.register_if_needed()
 
     s3 = S3Adapter(NOVELS_BUCKET, region=REGION)
     facade = MemoryFacadeImpl(
-        agentcore=AgentCoreMemoryClient(region=REGION),
+        agentcore=AgentCoreMemoryClient(memory_id=AGENTCORE_MEMORY_ID, region=REGION),
         neptune=NeptuneSignedClient(NEPTUNE_ENDPOINT, region=REGION) if NEPTUNE_ENDPOINT else None,  # type: ignore[arg-type]
         opensearch=OpenSearchVectorClient(OPENSEARCH_ENDPOINT, region=REGION) if OPENSEARCH_ENDPOINT else None,  # type: ignore[arg-type]
+        region=REGION,
     )
     checkpoint = CheckpointStore(jobs_table)
 

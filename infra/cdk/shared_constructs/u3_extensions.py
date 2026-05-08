@@ -132,16 +132,11 @@ def extend_observability_stack(stack: Construct, cfg, *, alerts_topic) -> None:
 
 
 def extend_agentcore_stack(stack: Construct, cfg) -> None:
-    """Declare AgentCore Memory namespace pattern + Observability project name via SSM."""
-    ssm.StringParameter(
-        stack,
-        "U3AgentCoreMemoryNsPattern",
-        parameter_name=f"/novelgen/{cfg.env_name}/agentcore/memory-namespace-pattern",
-        string_value="{team_id}:{novel_id}",
-    )
-    ssm.StringParameter(
-        stack,
-        "U3AgentCoreObsProject",
-        parameter_name=f"/novelgen/{cfg.env_name}/agentcore/observability-project",
-        string_value=f"novelgen-{cfg.env_name}",
-    )
+    """U8 supersedes these placeholders.
+
+    The AgentCoreStack now creates real Memory/Gateway/Runtime/WorkloadIdentity
+    resources and emits SSM parameters under `/novelgen/{env}/agentcore/*`. This
+    function is kept as a no-op so any existing callers from U3 integration don't
+    break; the real wiring lives in `stacks/agentcore_stack.py`.
+    """
+    _ = stack, cfg  # no-op

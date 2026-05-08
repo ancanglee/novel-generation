@@ -249,7 +249,7 @@ flowchart LR
 | 观测 | CloudWatch Alarm | 5 | BedrockTokensSpike / DailyTokens / CrossTeamDenied / Api5xx / EcsUnhealthy |
 | 观测 | LogGroup | ~15 | ECS × 8（1 月）+ SFN × 5（3 月）+ EMF（1 周）|
 | 观测 | SNS Topic | 1 | alerts（邮件订阅）|
-| Agent | AgentCore 资源 | 5 | Memory / Runtime / Gateway / Browser / Identity（preview 占位）|
+| Agent | AgentCore 资源 | 1 Memory + 1 Gateway + 6 GatewayTargets + 5 AgentRuntimes + 1 WorkloadIdentity + 观测 | 由 `infra/cdk/stacks/agentcore_stack.py` 通过 bootstrap Lambda 实际创建（详见 § 12）|
 
 ---
 
@@ -652,16 +652,52 @@ X-Ray 采样在 BFF 和 API 入口打开（当前 SFN 关闭以降成本）。Tr
 
 ## 12. AgentCore 集成
 
-AgentCore 当前仍为 **preview**，`AgentCoreStack` 是占位（等待 CFN GA）。集成点：
+U8 把全部 AgentCore 子服务从 "preview 占位" 升级为 **真实 SDK/API 接入**。所有资源在 CDK 部署阶段通过 `infra/cdk/bootstrap/agentcore_bootstrap/handler.py`（custom resource Lambda，调 `bedrock-agentcore-control` API）创建；运行时代码通过 SSM 参数解析 ID/ARN 后调用 `bedrock-agentcore` data plane。
 
-| 子服务 | 使用场景 | 用户 |
+### 12.1 资源拓扑（dev / prod 各一套）
+
+| 子服务 | 资源 | 命名 | 创建方 | 使用方 |
+|---|---|---|---|---|
+| **Memory** | 1× Memory + SEMANTIC & SUMMARIZATION 策略 | `novelgen-{env}-memory` | CDK bootstrap Lambda | worker-analysis / worker-generation（通过 MemoryFacade） + 每个 Gateway tool |
+| **Gateway** | 1× MCP Gateway + 6× GatewayTarget | `novelgen-{env}-gateway` + `memory-facade / graph-ops / vector-ops / ingestion-fetch / ingestion-browser / ddb-jobs` | CDK bootstrap Lambda | 所有 Agent（通过 GatewayMcpClient） |
+| **Runtime** | 5× AgentRuntime | `novelgen-{env}-{supervisor-understanding,supervisor-generation,critic,consistency,moderation}` | CDK bootstrap Lambda | Worker 容器即 AgentRuntime 的 containerUri |
+| **Browser** | 0 自建（使用 DEFAULT browser identifier） | — | AWS 默认 | `gateway-ingestion-browser` Lambda + worker-ingestion `tier2_browser.py` |
+| **Identity** | 1× WorkloadIdentity | `novelgen-{env}-agent-workload` | CDK bootstrap Lambda | WorkloadIdentityClient（auth-adapter）；作为 Gateway 的 authorizer |
+| **Observability** | OTEL sidecar（AgentCore 自动）+ CloudWatch EMF 双写 | — | 容器启动 `init_observability()` | 所有 worker |
+
+### 12.2 SDK 映射速查
+
+| 资源 | Control Plane（创建/更新）| Data Plane（运行时）|
 |---|---|---|
-| **Memory** | 小说分析结果（人物 / 地理 / 风格）长期存储；风格样本混合检索 | worker-analysis 写 / worker-generation 读 |
-| **Runtime** | Supervisor + 子 agent 的 orchestration（U3 多 agent）| worker-analysis |
-| **Gateway** | 把 Neptune + OpenSearch + DynamoDB 统一成工具栈，供 agent 调用 | 全体 worker |
-| **Browser** | 自动爬虫抓取原著（搜索 + 翻页 + 下载）| worker-ingestion |
+| Memory | `CreateMemory`, `UpdateMemory`, `DeleteMemory`, `ListMemories` | `CreateEvent`, `RetrieveMemoryRecords`, `ListEvents` |
+| Gateway | `CreateGateway`, `CreateGatewayTarget`, `UpdateGatewayTarget`, `ListGateways`, `ListGatewayTargets` | MCP HTTPS `tools/call` with `Authorization: Bearer <workloadToken>` |
+| AgentRuntime | `CreateAgentRuntime`, `UpdateAgentRuntime`, `GetAgentRuntime`, `ListAgentRuntimes` | `InvokeAgentRuntime`（供 Supervisor → Sub-agent 递归调用）|
+| Browser | — | `StartBrowserSession`, `StopBrowserSession`, `GetBrowserSession`（+ playwright CDP `connect_over_cdp`）|
+| WorkloadIdentity | `CreateWorkloadIdentity`, `GetWorkloadIdentity` | `GetWorkloadAccessToken`, `GetResourceOauth2Token` |
 
-> V1 的落地策略：CDK 里用 custom resource 占位，实际资源在 U3/U4/U5 的业务代码里通过 SDK 动态创建（Memory namespace per env，Gateway tool schema 随应用版本滚动）。
+### 12.3 多租户命名
+
+- Memory event `actorId = "{team_id}:{novel_id}"`，`sessionId = "{job_id}"` 或语义 slot（如 `"chapters"`、`"style"`、`"facts"`）。
+- Memory strategy `namespaces = ["{actorId}/{sessionId}", "{actorId}"]` 由 CreateMemory 配置固化——所有 RetrieveMemoryRecords 自动按 team+novel 隔离。
+- Gateway JWT `sub` 取 Workload token，权限检查由 Gateway 基于 `workloadIdentityAuthorizer` 完成。
+
+### 12.4 SSM 参数契约
+
+部署后 `/novelgen/{env}/agentcore/` 下产出：
+- `memory-id` / `memory-arn`
+- `gateway-id` / `gateway-endpoint`
+- `workload-identity-arn`
+- `runtime/{supervisor-understanding,supervisor-generation,critic,consistency,moderation}-arn`
+
+Worker 容器 env 由 CDK 在 `ComputeStack` 中从这些 SSM 读取（或 `AgentRuntime.environment` 直接注入）。
+
+### 12.5 架构简化点（vs preview-placeholder 版本）
+
+- Memory 不再"失败静默跳过"：`AgentCoreMemoryClient.put_batch` 失败 → `MemoryWriteError` → `MemoryFacadeImpl.remember` raise → SQS DLQ。
+- `recall()` 主路径走 AgentCore Memory；OpenSearch 仅当 Memory 返回 0 条时兜底。
+- Gateway 统一了 Agent→后端的访问口，Worker 容器**不再直连** Neptune/AOSS，只调 Gateway tool；后端 Lambda 封装底层 client。
+- AgentCore Runtime 统一承载 Agent 容器生命周期；Worker 启动 `AgentCoreRegistrar` 只做健康检查 + DDB 心跳，不再自己 register。
+- Observability 改为 OTEL → AgentCore Runtime sidecar → CloudWatch，原 `emit_metric()` 双写保留以免现有 Alarm 失效。
 
 ---
 

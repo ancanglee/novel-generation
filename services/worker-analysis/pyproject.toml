@@ -9,6 +9,8 @@ dependencies = [
     "novelgen-storage-adapter",
     "novelgen-obs-adapter",
     "novelgen-memory-facade",
+    "novelgen-agentcore-runtime",
+    "novelgen-agentcore-gateway",
     "aioboto3>=13.0,<14",
     "boto3>=1.35",
     "botocore>=1.35",
@@ -27,6 +29,8 @@ novelgen-auth-adapter = { workspace = true }
 novelgen-storage-adapter = { workspace = true }
 novelgen-obs-adapter = { workspace = true }
 novelgen-memory-facade = { workspace = true }
+novelgen-agentcore-runtime = { workspace = true }
+novelgen-agentcore-gateway = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

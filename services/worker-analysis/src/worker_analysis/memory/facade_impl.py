@@ -1,4 +1,14 @@
-"""MemoryFacade concrete implementation with three-layer flush + tiered degradation (F8=A)."""
+"""MemoryFacade concrete implementation.
+
+Architecture (post-AgentCore):
+- **AgentCore Memory is the system of record** for facts. Writes there MUST succeed
+  or we raise `MemoryBackendError` → caller routes to DLQ.
+- Neptune (graph) + OpenSearch (vector) are **enhancement stores**. Writes are
+  best-effort and degrade silently (with metrics). Reads fall through to them only
+  when Memory returns zero results.
+- No more `except NotImplementedError: log.warning(...)` silent placeholders. AgentCore
+  calls are real SDK invocations; failures propagate.
+"""
 
 from __future__ import annotations
 
@@ -15,7 +25,12 @@ from novelgen_memory.models import CharacterSnapshot, GraphEdge, GraphNode, Vect
 from novelgen_obs import emit_metric, get_logger
 from novelgen_types.fact import Fact
 
-from worker_analysis.memory.agentcore_memory import AgentCoreMemoryClient, MemoryItem
+from worker_analysis.memory.agentcore_memory import (
+    AgentCoreMemoryClient,
+    MemoryItem,
+    MemoryReadError,
+    MemoryWriteError,
+)
 from worker_analysis.memory.neptune_client import NeptuneSignedClient
 from worker_analysis.memory.opensearch_client import OpenSearchVectorClient
 
@@ -25,19 +40,20 @@ _EMBED_CACHE: LRUCache[str, list[float]] = LRUCache(maxsize=1000)
 
 
 class MemoryBackendError(Exception):
-    """AgentCore Memory write failed — fatal for the Fact."""
+    """AgentCore Memory write failed — fatal for the Fact batch."""
 
 
 class MemoryFacadeImpl(MemoryFacade):
-    """Concrete MemoryFacade. AgentCore Memory is critical; Neptune/OpenSearch degrade."""
+    """Concrete MemoryFacade with AgentCore Memory as authoritative store."""
 
     def __init__(
         self,
         agentcore: AgentCoreMemoryClient,
-        neptune: NeptuneSignedClient,
-        opensearch: OpenSearchVectorClient,
+        neptune: NeptuneSignedClient | None,
+        opensearch: OpenSearchVectorClient | None,
+        *,
         embed_model: str = "amazon.titan-embed-text-v2:0",
-        region: str = "us-east-1",
+        region: str = "us-west-2",
     ) -> None:
         self._agentcore = agentcore
         self._neptune = neptune
@@ -47,23 +63,45 @@ class MemoryFacadeImpl(MemoryFacade):
         self._session = aioboto3.Session()
 
     # ------------------------------------------------------------------
-    # AgentCore Memory
+    # AgentCore Memory (authoritative)
     # ------------------------------------------------------------------
 
-    async def remember(self, team_id: UUID, novel_id: UUID, facts: list[Fact]) -> None:
-        """Critical path: all facts must land in AgentCore Memory; other backends degrade."""
+    async def remember(
+        self,
+        team_id: UUID,
+        novel_id: UUID,
+        facts: list[Fact],
+        *,
+        session_id: str | None = None,
+    ) -> None:
+        """Write facts to AgentCore Memory (must succeed) + graph/vector (best effort).
+
+        `session_id` defaults to "facts" if unspecified; callers with a job_id should
+        pass `session_id=str(job_id)` to group events per job.
+        """
         if not facts:
             return
 
-        # Step 1: AgentCore Memory (must succeed)
+        items = [
+            MemoryItem(
+                fact_key=f.fact_key,
+                content=f.content or {},
+                fact_type=f.fact_type.value if hasattr(f.fact_type, "value") else str(f.fact_type),
+                source_chapter=f.source_chapter,
+            )
+            for f in facts
+        ]
+
+        # Step 1: AgentCore Memory — must succeed.
         try:
-            items = [MemoryItem(fact_key=f.fact_key, content=f.content) for f in facts]
-            await self._agentcore.put_batch(team_id, novel_id, items)
+            await self._agentcore.put_batch(
+                team_id,
+                novel_id,
+                items,
+                session_id=session_id or "facts",
+            )
             emit_metric("MemoryWriteSuccess", 1.0, dimensions={"Layer": "agentcore"})
-        except NotImplementedError:
-            # SDK placeholder — accept as success in V1 development
-            log.warning("AgentCore Memory SDK not wired; skipping (V1 placeholder)")
-        except Exception as e:
+        except MemoryWriteError as e:
             emit_metric("MemoryWriteFailure", 1.0, dimensions={"Layer": "agentcore"})
             raise MemoryBackendError(f"AgentCore Memory write failed: {e}") from e
 
@@ -77,6 +115,8 @@ class MemoryFacadeImpl(MemoryFacade):
     async def _try_write_graph(
         self, team_id: UUID, novel_id: UUID, facts: list[Fact]
     ) -> None:
+        if self._neptune is None:
+            return
         try:
             tid = str(team_id)
             nid = str(novel_id)
@@ -92,6 +132,8 @@ class MemoryFacadeImpl(MemoryFacade):
     async def _try_write_vectors(
         self, team_id: UUID, novel_id: UUID, facts: list[Fact]
     ) -> None:
+        if self._opensearch is None:
+            return
         try:
             docs = []
             for fact in facts:
@@ -117,16 +159,32 @@ class MemoryFacadeImpl(MemoryFacade):
     async def recall(
         self, team_id: UUID, novel_id: UUID, query: str, top_k: int = 20
     ) -> list[Fact]:
-        embedding = await self.embed(query)
+        """Retrieve facts. Primary: AgentCore Memory. Fallback: OpenSearch."""
+        # Primary path — AgentCore Memory.
         try:
+            records = await self._agentcore.retrieve(
+                team_id, novel_id, query=query, top_k=top_k
+            )
+            emit_metric("MemoryReadSuccess", 1.0, dimensions={"Layer": "agentcore"})
+        except MemoryReadError as e:
+            log.warning("AgentCore recall failed; falling back to vector", extra={"error": str(e)})
+            emit_metric("MemoryReadFailure", 1.0, dimensions={"Layer": "agentcore"})
+            records = []
+
+        if records:
+            return [_memory_record_to_fact(team_id, novel_id, r) for r in records]
+
+        # Fallback — OpenSearch (degraded mode).
+        if self._opensearch is None:
+            return []
+        try:
+            embedding = await self.embed(query)
             hits = await self._opensearch.knn_search(team_id, novel_id, embedding, top_k)
         except Exception as e:
-            log.warning("OpenSearch recall failed; returning empty", extra={"error": str(e)})
+            log.warning("OpenSearch fallback failed; empty", extra={"error": str(e)})
             emit_metric("MemoryReadFailure", 1.0, dimensions={"Layer": "opensearch"})
             return []
 
-        # Ideally we'd fetch the full Fact from AgentCore Memory by fact_key here.
-        # Until that SDK is wired, we reconstruct from the index payload.
         results: list[Fact] = []
         for hit in hits:
             src = hit.get("_source", {})
@@ -152,11 +210,37 @@ class MemoryFacadeImpl(MemoryFacade):
         character_id: str,
         at_chapter: int | None = None,
     ) -> CharacterSnapshot | None:
-        # Delegates to U1 storage-adapter elsewhere; not implemented here in Round 1.
-        raise NotImplementedError("get_character lives in Round 2 + StorageAdapter integration")
+        """Pull the most recent CHARACTER_SNAPSHOT for character_id from Memory."""
+        query = f"character snapshot for {character_id}"
+        if at_chapter is not None:
+            query += f" at or before chapter {at_chapter}"
+        try:
+            records = await self._agentcore.retrieve(
+                team_id, novel_id, query=query, top_k=10
+            )
+        except MemoryReadError as e:
+            log.warning("get_character recall failed", extra={"error": str(e)})
+            return None
+
+        for rec in records:
+            try:
+                payload = json.loads(rec.content_text)
+            except (ValueError, TypeError):
+                continue
+            content = payload.get("content") or {}
+            if content.get("character_id") == character_id:
+                if at_chapter is not None and content.get("chapter", 0) > at_chapter:
+                    continue
+                return CharacterSnapshot(
+                    character_id=character_id,
+                    display_name=content.get("display_name", character_id),
+                    chapter=int(content.get("chapter", 0)),
+                    attributes=content,
+                )
+        return None
 
     # ------------------------------------------------------------------
-    # Graph
+    # Graph (enhancement store)
     # ------------------------------------------------------------------
 
     async def upsert_graph(
@@ -166,6 +250,9 @@ class MemoryFacadeImpl(MemoryFacade):
         nodes: list[GraphNode],
         edges: list[GraphEdge],
     ) -> None:
+        if self._neptune is None:
+            log.debug("upsert_graph skipped: no neptune configured")
+            return
         tid = str(team_id)
         nid = str(novel_id)
         try:
@@ -195,6 +282,8 @@ class MemoryFacadeImpl(MemoryFacade):
         edge_type: str | None = None,
         depth: int = 1,
     ) -> list[GraphNode]:
+        if self._neptune is None:
+            return []
         try:
             rows = await self._neptune.neighbors(
                 str(team_id), str(novel_id), node_id, edge_type=edge_type, limit=50
@@ -216,7 +305,7 @@ class MemoryFacadeImpl(MemoryFacade):
         return results
 
     # ------------------------------------------------------------------
-    # Vectors
+    # Vectors (enhancement store)
     # ------------------------------------------------------------------
 
     async def index_vector(
@@ -227,6 +316,8 @@ class MemoryFacadeImpl(MemoryFacade):
         embedding: list[float],
         payload: dict[str, Any],
     ) -> None:
+        if self._opensearch is None:
+            return
         doc = {"fact_key": chunk_id, "embedding": embedding, **payload}
         await self._opensearch.bulk_index(team_id, novel_id, [doc])
 
@@ -238,6 +329,8 @@ class MemoryFacadeImpl(MemoryFacade):
         top_k: int = 10,
         filters: dict[str, Any] | None = None,
     ) -> list[VectorHit]:
+        if self._opensearch is None:
+            return []
         hits = await self._opensearch.knn_search(team_id, novel_id, embedding, top_k, filters)
         return [
             VectorHit(
@@ -256,6 +349,8 @@ class MemoryFacadeImpl(MemoryFacade):
         query_embed: list[float],
         top_k: int = 10,
     ) -> list[VectorHit]:
+        if self._opensearch is None:
+            return []
         hits = await self._opensearch.hybrid_search(
             team_id, novel_id, query_text, query_embed, top_k
         )
@@ -302,8 +397,7 @@ def _fact_text(fact: Fact) -> str:
 
 
 def _fact_to_graph_node(fact: Fact) -> tuple[str, str, dict[str, Any]]:
-    """Infer (label, node_id, props) from Fact. Returns ("", "", {}) if no graph mapping."""
-    ft = fact.fact_type.value
+    ft = fact.fact_type.value if hasattr(fact.fact_type, "value") else str(fact.fact_type)
     if ft == "CHARACTER_SNAPSHOT":
         name = (fact.content or {}).get("character_id", "")
         return "Character", name, fact.content or {}
@@ -314,3 +408,19 @@ def _fact_to_graph_node(fact: Fact) -> tuple[str, str, dict[str, Any]]:
         eid = (fact.content or {}).get("event_id", "")
         return "Event", eid, fact.content or {}
     return "", "", {}
+
+
+def _memory_record_to_fact(team_id: UUID, novel_id: UUID, rec) -> Fact:
+    """Parse a MemoryRecord.content_text (which is JSON of the original MemoryItem)."""
+    try:
+        payload = json.loads(rec.content_text)
+    except (ValueError, TypeError):
+        payload = {}
+    return Fact(
+        fact_key=payload.get("fact_key", rec.record_id),
+        team_id=team_id,
+        novel_id=novel_id,
+        fact_type=payload.get("fact_type"),
+        content=payload.get("content") or {},
+        source_chapter=payload.get("source_chapter"),
+    )

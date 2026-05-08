@@ -11,6 +11,8 @@ dependencies = [
     "novelgen-obs-adapter",
     "novelgen-memory-facade",
     "novelgen-browser-pool",
+    "novelgen-agentcore-runtime",
+    "novelgen-agentcore-gateway",
     "novelgen-api",
     "novelgen-worker-ingestion",
     "novelgen-worker-analysis",
@@ -22,6 +24,12 @@ dependencies = [
     "novelgen-audit-archiver",
     "novelgen-load-novel-metadata",
     "novelgen-load-generation-context",
+    "novelgen-gateway-memory-facade",
+    "novelgen-gateway-ddb-jobs",
+    "novelgen-gateway-ingestion-fetch",
+    "novelgen-gateway-ingestion-browser",
+    "novelgen-gateway-graph-ops",
+    "novelgen-gateway-vector-ops",
 ]
 
 [tool.uv.workspace]
@@ -32,6 +40,8 @@ members = [
     "packages/observability-adapter",
     "packages/memory-facade",
     "packages/agentcore-browser-pool",
+    "packages/agentcore-runtime-client",
+    "packages/agentcore-gateway-client",
     "services/*",
     "lambdas/*",
     "infra/cdk",
@@ -44,6 +54,8 @@ novelgen-storage-adapter = { workspace = true }
 novelgen-obs-adapter = { workspace = true }
 novelgen-memory-facade = { workspace = true }
 novelgen-browser-pool = { workspace = true }
+novelgen-agentcore-runtime = { workspace = true }
+novelgen-agentcore-gateway = { workspace = true }
 novelgen-api = { workspace = true }
 novelgen-worker-ingestion = { workspace = true }
 novelgen-worker-analysis = { workspace = true }
@@ -55,6 +67,12 @@ novelgen-cost-aggregator = { workspace = true }
 novelgen-audit-archiver = { workspace = true }
 novelgen-load-novel-metadata = { workspace = true }
 novelgen-load-generation-context = { workspace = true }
+novelgen-gateway-memory-facade = { workspace = true }
+novelgen-gateway-ddb-jobs = { workspace = true }
+novelgen-gateway-ingestion-fetch = { workspace = true }
+novelgen-gateway-ingestion-browser = { workspace = true }
+novelgen-gateway-graph-ops = { workspace = true }
+novelgen-gateway-vector-ops = { workspace = true }
 
 [dependency-groups]
 dev = [

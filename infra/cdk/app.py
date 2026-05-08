@@ -66,7 +66,13 @@ def main() -> None:
         app, f"{cfg.prefix}-observability", cfg=cfg, data=data, compute=compute, env=env
     )
 
-    AgentCoreStack(app, f"{cfg.prefix}-agentcore", cfg=cfg, data=data, identity=identity, env=env)
+    agentcore = AgentCoreStack(
+        app, f"{cfg.prefix}-agentcore", cfg=cfg, data=data, identity=identity, env=env
+    )
+    # AgentCore Runtime references worker ECR images; ensure compute (which owns repos)
+    # is deployed first. The Runtime itself resolves container URIs at invocation time
+    # so missing tags at synth are tolerated.
+    agentcore.add_dependency(compute)
 
     for k, v in tags.items():
         cdk.Tags.of(app).add(k, v)
