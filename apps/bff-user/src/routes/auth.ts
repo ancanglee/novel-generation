@@ -1,10 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import { nanoid } from "nanoid";
 import type { BaseClient, generators } from "openid-client";
-import type { AppConfig } from "../config";
-import type { CookieSigner } from "../session/cookies";
-import { CSRF_COOKIE, SID_COOKIE } from "../session/middleware";
-import type { SessionStore } from "../session/store";
+import type { AppConfig } from "../config.js";
+import type { CookieSigner } from "../session/cookies.js";
+import { CSRF_COOKIE, SID_COOKIE } from "../session/middleware.js";
+import type { SessionStore } from "../session/store.js";
 
 export interface AuthRoutesDeps {
   config: AppConfig;

@@ -9,6 +9,7 @@ from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_logs as logs
+from aws_cdk import aws_secretsmanager as secretsmanager
 from config import EnvConfig
 from constructs import Construct
 
@@ -109,6 +110,55 @@ class ComputeStack(cdk.Stack):
             open=True,
         )
 
+        # Build shared business env map once; per-service additions below.
+        alb_base_url = f"http://{self.alb.load_balancer_dns_name}"
+        common_env: dict[str, str] = {
+            "ENV": cfg.env_name,
+            "NOVELGEN_ENV": cfg.env_name,
+            "AWS_REGION": cfg.region,
+            "AWS_DEFAULT_REGION": cfg.region,
+            "TENANCY_TABLE": data.tenancy_table.table_name,
+            "JOBS_TABLE": data.jobs_table.table_name,
+            "CONFIG_TABLE": data.config_table.table_name,
+            "AUDIT_EVENTS_TABLE": data.audit_table.table_name,
+            "NOVELS_BUCKET": data.novels_bucket.bucket_name,
+            "EXPORTS_BUCKET": data.exports_bucket.bucket_name,
+            "CHAPTER_BUCKET": data.novels_bucket.bucket_name,
+            "OUTLINE_BUCKET": data.novels_bucket.bucket_name,
+            "COGNITO_USER_POOL_ID": identity.user_pool.user_pool_id,
+            "COGNITO_APP_CLIENT_ID": identity.app_client.user_pool_client_id,
+            "COGNITO_REGION": cfg.region,
+            "ANALYSIS_QUEUE_URL": messaging.queues["analysis"].queue_url,
+            "GENERATION_QUEUE_URL": messaging.queues["generation"].queue_url,
+            "CRITIC_QUEUE_URL": messaging.queues["critic"].queue_url,
+            "CONSISTENCY_QUEUE_URL": messaging.queues["consistency"].queue_url,
+            "MODERATION_QUEUE_URL": messaging.queues["moderation"].queue_url,
+            "REVIEW_QUEUE_URL": messaging.queues["review"].queue_url,
+            "INGESTION_STATE_MACHINE_ARN": messaging.state_machines["ingestion"].state_machine_arn,
+            "ANALYSIS_STATE_MACHINE_ARN": messaging.state_machines["analysis"].state_machine_arn,
+            "OUTLINE_STATE_MACHINE_ARN": messaging.state_machines["outline"].state_machine_arn,
+            "CHAPTER_STATE_MACHINE_ARN": messaging.state_machines["chapter"].state_machine_arn,
+            "CONSISTENCY_STATE_MACHINE_ARN": messaging.state_machines["consistency"].state_machine_arn,
+            "NEPTUNE_ENDPOINT": data.neptune_cluster.cluster_endpoint.socket_address,
+            "OPENSEARCH_ENDPOINT": data.aoss_collection.attr_collection_endpoint,
+            "LOG_LEVEL": "info",
+        }
+
+        # APP_BASE_URL must be the public CloudFront domain (redirect_uri origin
+        # that Cognito was registered with). Pass via context: `-c user_cf_url=...`
+        # Falls back to ALB URL when unset (dev-only, OAuth will fail).
+        user_cf_url = self.node.try_get_context("user_cf_url") or alb_base_url
+        bff_env = {
+            **common_env,
+            "API_BASE_URL": alb_base_url,
+            "APP_BASE_URL": user_cf_url,
+            "COGNITO_DOMAIN": f"{identity.user_pool_domain.domain_name}.auth.{cfg.region}.amazoncognito.com",
+            "PORT": "3000",
+        }
+        bff_secrets = {
+            "SESSION_SIGNING_KEY": ecs.Secret.from_secrets_manager(identity.session_signing_secret),
+        }
+
         # Target groups + services
         self.api_service = self._make_fargate_service(
             name="api-service",
@@ -121,6 +171,7 @@ class ComputeStack(cdk.Stack):
             memory_mb=2048,
             port=8000,
             spot=False,
+            env=common_env,
         )
         self.front_user_service = self._make_fargate_service(
             name="frontend-user",
@@ -137,6 +188,8 @@ class ComputeStack(cdk.Stack):
             memory_mb=1024,
             port=3000,
             spot=False,
+            env=bff_env,
+            secrets=bff_secrets,
         )
         self.front_admin_service = self._make_fargate_service(
             name="frontend-admin",
@@ -153,6 +206,7 @@ class ComputeStack(cdk.Stack):
             memory_mb=512,
             port=3001,
             spot=False,
+            env={"ENV": cfg.env_name, "SERVICE_NAME": "frontend-admin"},
         )
 
         # Workers (no ALB, Spot)
@@ -161,6 +215,7 @@ class ComputeStack(cdk.Stack):
             self.worker_services[wt] = self._make_worker_service(
                 wt, cfg, network.vpc, network.sg_ecs_worker,
                 identity.worker_roles[wt], self._local_exec_role,
+                env=common_env,
             )
 
         # ---- Listener rules ----------------------------------------------
@@ -172,7 +227,11 @@ class ComputeStack(cdk.Stack):
         self.listener.add_action(
             "FrontRoute",
             priority=100,
-            conditions=[elbv2.ListenerCondition.path_patterns(["/healthz", "/"])],
+            conditions=[
+                elbv2.ListenerCondition.path_patterns(
+                    ["/healthz", "/", "/auth/*", "/telemetry/*"]
+                )
+            ],
             action=elbv2.ListenerAction.forward([self.front_user_service["target_group"]]),
         )
         self.listener.add_action(
@@ -203,6 +262,8 @@ class ComputeStack(cdk.Stack):
         memory_mb: int,
         port: int,
         spot: bool,
+        env: dict[str, str] | None = None,
+        secrets: dict[str, ecs.Secret] | None = None,
     ) -> dict:
         task_def = ecs.FargateTaskDefinition(
             self,
@@ -212,21 +273,10 @@ class ComputeStack(cdk.Stack):
             task_role=task_role,
             execution_role=exec_role,
         )
+        container_env = {"SERVICE_NAME": name, **(env or {})}
         task_def.add_container(
             "Container",
-            image=ecs.ContainerImage.from_registry(
-                "public.ecr.aws/nginx/nginx:stable-alpine"  # placeholder before first push
-            ),
-            command=[
-                "sh",
-                "-c",
-                (
-                    "mkdir -p /usr/share/nginx/html && "
-                    "echo ok > /usr/share/nginx/html/healthz && "
-                    f"sed -i 's/listen       80;/listen       {port};/' /etc/nginx/conf.d/default.conf && "
-                    "nginx -g 'daemon off;'"
-                ),
-            ],
+            image=ecs.ContainerImage.from_ecr_repository(self.repos[name], tag="latest"),
             logging=ecs.LogDriver.aws_logs(
                 stream_prefix=name,
                 log_group=logs.LogGroup(
@@ -238,7 +288,8 @@ class ComputeStack(cdk.Stack):
                 ),
             ),
             port_mappings=[ecs.PortMapping(container_port=port)],
-            environment={"ENV": cfg.env_name, "SERVICE_NAME": name},
+            environment=container_env,
+            secrets=secrets or None,
         )
 
         service = ecs.FargateService(
@@ -297,6 +348,7 @@ class ComputeStack(cdk.Stack):
         security_group: ec2.SecurityGroup,
         task_role: iam.Role,
         exec_role: iam.Role,
+        env: dict[str, str] | None = None,
     ) -> ecs.FargateService:
         cpu, mem = (2048, 4096) if wt in ("analysis", "generation") else (1024, 2048)
         task_def = ecs.FargateTaskDefinition(
@@ -307,12 +359,10 @@ class ComputeStack(cdk.Stack):
             task_role=task_role,
             execution_role=exec_role,
         )
+        container_env = {"WORKER_TYPE": wt, **(env or {})}
         task_def.add_container(
             "Container",
-            image=ecs.ContainerImage.from_registry(
-                "public.ecr.aws/docker/library/busybox:stable"
-            ),
-            command=["sh", "-c", "while true; do sleep 3600; done"],
+            image=ecs.ContainerImage.from_ecr_repository(self.repos[f"worker-{wt}"], tag="latest"),
             logging=ecs.LogDriver.aws_logs(
                 stream_prefix=f"worker-{wt}",
                 log_group=logs.LogGroup(
@@ -323,7 +373,7 @@ class ComputeStack(cdk.Stack):
                     removal_policy=cdk.RemovalPolicy.DESTROY,
                 ),
             ),
-            environment={"ENV": cfg.env_name, "WORKER_TYPE": wt},
+            environment=container_env,
         )
         service = ecs.FargateService(
             self,

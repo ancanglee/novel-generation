@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { requireAuth } from "../session/middleware";
-import type { TelemetryEvent } from "../telemetry/emf";
+import { requireAuth } from "../session/middleware.js";
+import type { TelemetryEvent } from "../telemetry/emf.js";
 
 const telemetrySchema = z.object({
   name: z

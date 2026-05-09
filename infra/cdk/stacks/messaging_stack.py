@@ -28,8 +28,9 @@ class MessagingStack(cdk.Stack):
     ) -> None:
         super().__init__(scope, id_, **kwargs)
 
-        # ---- SQS queues (5 + 5 DLQs) --------------------------------------
-        queue_names = ["analysis", "generation", "critic", "consistency", "moderation"]
+        # ---- SQS queues (6 + 6 DLQs) --------------------------------------
+        # review queue: worker-generation publishes rough drafts for human/automated review loop
+        queue_names = ["analysis", "generation", "critic", "consistency", "moderation", "review"]
         self.queues: dict[str, sqs.Queue] = {}
         self.dlqs: dict[str, sqs.Queue] = {}
         for name in queue_names:

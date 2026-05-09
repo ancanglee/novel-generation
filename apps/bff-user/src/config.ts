@@ -12,7 +12,10 @@ const envSchema = z.object({
   APP_BASE_URL: z.string().url(),
   SESSION_SIGNING_KEY: z.string().min(32),
   SESSION_TTL_HOURS: z.coerce.number().positive().default(6),
-  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  LOG_LEVEL: z.preprocess(
+    (v) => (typeof v === "string" ? v.toLowerCase() : v),
+    z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  ),
 });
 
 export type AppConfig = z.infer<typeof envSchema> & {

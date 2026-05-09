@@ -1,6 +1,6 @@
 import fastifyHelmet from "@fastify/helmet";
 import type { FastifyInstance } from "fastify";
-import type { AppConfig } from "../config";
+import type { AppConfig } from "../config.js";
 
 export async function registerHelmet(app: FastifyInstance, config: AppConfig): Promise<void> {
   await app.register(fastifyHelmet, {

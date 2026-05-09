@@ -1,6 +1,6 @@
 import fastifyRateLimit from "@fastify/rate-limit";
 import type { FastifyInstance } from "fastify";
-import { SID_COOKIE } from "../session/middleware";
+import { SID_COOKIE } from "../session/middleware.js";
 
 export async function registerRateLimit(app: FastifyInstance): Promise<void> {
   await app.register(fastifyRateLimit, {

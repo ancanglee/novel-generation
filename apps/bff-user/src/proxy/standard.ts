@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { request as undiciRequest } from "undici";
-import type { AppConfig } from "../config";
-import type { ServerSession } from "../session/store";
+import type { AppConfig } from "../config.js";
+import type { ServerSession } from "../session/store.js";
 
 const HOP_BY_HOP = new Set([
   "connection",

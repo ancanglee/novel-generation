@@ -6,6 +6,7 @@ import aws_cdk as cdk
 from aws_cdk import aws_cognito as cognito
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
+from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import aws_ssm as ssm
 from config import EnvConfig
 from constructs import Construct
@@ -65,6 +66,27 @@ class IdentityStack(cdk.Stack):
             },
             lambda_triggers=cognito.UserPoolTriggers(pre_sign_up=self.pre_signup_fn),
             removal_policy=cdk.RemovalPolicy.DESTROY if cfg.env_name == "dev" else cdk.RemovalPolicy.RETAIN,
+        )
+
+        # Hosted UI domain (BFF OAuth flow requires this)
+        self.user_pool_domain = self.user_pool.add_domain(
+            "HostedDomain",
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix=f"novelgen-{cfg.env_name}-{self.account[-6:]}"
+            ),
+        )
+
+        # Session signing key for BFF cookie-based sessions (>=32 chars random)
+        self.session_signing_secret = secretsmanager.Secret(
+            self,
+            "BffSessionSigningKey",
+            secret_name=f"/novelgen/{cfg.env_name}/bff/session-signing-key",
+            description="BFF cookie signing key (min 32 chars)",
+            generate_secret_string=secretsmanager.SecretStringGenerator(
+                password_length=48,
+                exclude_punctuation=True,
+                include_space=False,
+            ),
         )
 
         # Cognito Groups
@@ -239,3 +261,5 @@ class IdentityStack(cdk.Stack):
 
         cdk.CfnOutput(self, "UserPoolId", value=self.user_pool.user_pool_id)
         cdk.CfnOutput(self, "AppClientId", value=self.app_client.user_pool_client_id)
+        cdk.CfnOutput(self, "CognitoDomain", value=self.user_pool_domain.domain_name)
+        cdk.CfnOutput(self, "BffSessionSigningSecretArn", value=self.session_signing_secret.secret_arn)

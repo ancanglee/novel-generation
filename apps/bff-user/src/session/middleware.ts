@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { AppConfig } from "../config";
-import type { CookieSigner } from "./cookies";
-import type { ServerSession, SessionStore } from "./store";
+import type { AppConfig } from "../config.js";
+import type { CookieSigner } from "./cookies.js";
+import type { ServerSession, SessionStore } from "./store.js";
 
 export const SID_COOKIE = "sid";
 export const CSRF_COOKIE = "csrf";

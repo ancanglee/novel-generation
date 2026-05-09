@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import type { AppConfig } from "../config";
-import { proxySse } from "../proxy/sse";
-import { proxyToApi } from "../proxy/standard";
-import { requireAuth } from "../session/middleware";
+import type { AppConfig } from "../config.js";
+import { proxySse } from "../proxy/sse.js";
+import { proxyToApi } from "../proxy/standard.js";
+import { requireAuth } from "../session/middleware.js";
 
 const SSE_PATTERN = /^\/api\/v1\/generations\/[^/]+\/chapters\/[^/]+\/stream(\?.*)?$/;
 

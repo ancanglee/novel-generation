@@ -19,7 +19,8 @@ import os
 import signal
 
 log = logging.getLogger("worker_moderation")
-logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
+_LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=getattr(logging, _LOG_LEVEL, logging.INFO))
 
 _REGION = os.environ.get("AWS_REGION", "us-west-2")
 _ENV = os.environ.get("NOVELGEN_ENV", "dev")

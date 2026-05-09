@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { CSRF_COOKIE } from "../session/middleware";
+import { CSRF_COOKIE } from "../session/middleware.js";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const CSRF_EXEMPT_PATHS = new Set(["/auth/callback", "/auth/login", "/healthz"]);
